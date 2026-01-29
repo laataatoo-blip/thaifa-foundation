@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกี่ยวกับเรา - THAIFA Foundation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-size: 16px;
+            --background: #ffffff;
+            --foreground: #303a56;
+            --card: #ffffff;
+            --card-foreground: #303a56;
+            --primary: #233882;
+            --primary-foreground: #ffffff;
+            --secondary: #d9e7ef;
+            --secondary-foreground: #303a56;
+            --muted: #f5f8fa;
+            --muted-foreground: #64748b;
+            --accent: #e83b3b;
+            --accent-foreground: #ffffff;
+            --border: #e2e8f0;
+            --input-background: #f8fafc;
+            --font-weight-medium: 500;
+            --font-weight-normal: 400;
+        }
+        
+        * {
+            border-color: var(--border);
+        }
+        
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            font-size: var(--font-size);
+        }
+        
+        h1, h2, h3, h4, label, button {
+            font-weight: var(--font-weight-medium);
+            line-height: 1.5;
+        }
+        
+        p, input {
+            font-weight: var(--font-weight-normal);
+            line-height: 1.5;
+        }
+        
+        html {
+            font-size: var(--font-size);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#ffffff',
+                        foreground: '#303a56',
+                        primary: '#233882',
+                        'primary-foreground': '#ffffff',
+                        secondary: '#d9e7ef',
+                        'secondary-foreground': '#303a56',
+                        muted: '#f5f8fa',
+                        'muted-foreground': '#64748b',
+                        accent: '#e83b3b',
+                        'accent-foreground': '#ffffff',
+                        border: '#e2e8f0',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    
+    <!-- Navigation - Same as index.html -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <!-- Top Bar -->
+        <div class="bg-secondary/30 border-b border-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-10 text-sm">
+                    <div class="hidden md:flex items-center gap-6 text-foreground/80">
+                        <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-2 hover:text-primary transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            <span>thaifafoundation@gmail.com</span>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <a href="cart.html" class="relative text-foreground/80 hover:text-primary transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                        </a>
+                        <div class="flex items-center gap-2 pl-4 border-l border-border">
+                            <a href="login.html" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                            </a>
+                            <span class="text-foreground/40">/</span>
+                            <a href="register.html" class="text-foreground/80 hover:text-primary transition-colors">
+                                <span class="hidden sm:inline">สมัครสมาชิก</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Navigation -->
+        <div class="bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <a href="index.html" class="flex-shrink-0">
+                        <img src="img/cover.jpg" alt="THAIFA Foundation" class="h-16 w-auto" />
+                        <!-- Figma: figma:asset/d79e77b80b731c2b113fbc0ca2af22e9bdf66a5d.png -->
+                    </a>
+                    <div class="hidden lg:flex items-center gap-1">
+                        <a href="index.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">หน้าแรก</a>
+                        <a href="about.html" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md hover:bg-sky-100 transition-colors">เกี่ยวกับเรา</a>
+                        <a href="calendar.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ปฏิทิน</a>
+                        <a href="shop.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ร้านค้า</a>
+                        <a href="donate.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">การบริจาค</a>
+                        <a href="volunteer.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">จิตอาสา</a>
+                        <a href="stories.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เสียงจากใจ</a>
+                        <a href="contact.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ติดต่อเรา</a>
+                    </div>
+                    <button class="lg:hidden p-2">
+                        <div class="w-6 h-5 flex flex-col justify-between">
+                            <span class="w-full h-0.5 bg-primary"></span>
+                            <span class="w-full h-0.5 bg-primary"></span>
+                            <span class="w-full h-0.5 bg-primary"></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-[120px]">
+        
+        <!-- 1. About Section -->
+        <section id="about" class="py-20 bg-gradient-to-b from-secondary/20 to-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header -->
+                <div class="text-center mb-16">
+                    <div class="inline-block mb-4 px-6 py-2 bg-accent/10 rounded-full">
+                        <span class="text-accent">เกี่ยวกับเรา</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl text-primary mb-4">
+                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน
+                    </h2>
+                </div>
+
+                <!-- Main Content - Two Columns -->
+                <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+                    <!-- Left - Image -->
+                    <div class="relative">
+                        <div class="relative rounded-3xl overflow-hidden shadow-xl">
+                            <img
+                                src="https://via.placeholder.com/800x500/233882/FFFFFF?text=THAIFA+2025"
+                                alt="THAIFA Foundation - มอบทุนการศึกษา"
+                                class="w-full h-[500px] object-cover"
+                            />
+                            <!-- Figma: figma:asset/4e491dc46acd78e1aa2e8dda1d3918386daea8f0.png -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right - Content -->
+                    <div>
+                        <!-- Motto -->
+                        <div class="mb-6 pb-6 border-b-2 border-primary/20">
+                            <p class="text-2xl text-primary/90 italic">
+                                "จากสิ่งที่เราได้รับ คืนกลับสู่สังคม"
+                            </p>
+                        </div>
+
+                        <h3 class="text-3xl text-primary mb-6">
+                            มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน
+                        </h3>
+                        
+                        <!-- First Paragraph -->
+                        <p class="text-foreground/80 mb-4 leading-relaxed text-[15px]">
+                            มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน เดิมชื่อมูลนิธิตัวแทนประกันชีวิตเพื่อการกุศล ก่อตั้งขึ้นเมื่อปี พ.ศ. 2544 
+                            สืบเนื่องจากผลสำเร็จในการจัดงานสัมมนา APLIC ครั้งที่ 6 ที่ประเทศไทย โดยสมาคมตัวแทนประกันชีวิตและที่ปรึกษาการเงินแห่งประเทศไทย (THAIFA) 
+                            เป็นเจ้าภาพจัดขึ้น ซึ่งการสัมมนานี้ยังคงถูกบันทึกให้เป็นการสัมมนาตัวแทนประกันชีวิตที่ยิ่งใหญ่ที่สุดครั้งหนึ่งของเอเชีย ด้วยจำนวนผู้เข้าร่วมสัมมนากว่า 11,000 คน
+                        </p>
+
+                        <!-- Additional Content - Expandable -->
+                        <div id="additional-content" class="max-h-0 overflow-hidden opacity-0 transition-all duration-500">
+                            <p class="text-foreground/80 mb-4 leading-relaxed text-[15px]">
+                                คุณมนตรี แสงอุไรพร นายกสมาคมตัวแทนประกันชีวิต (ซึ่งเป็นสมาชิกในขณะนั้น) ในฐานะประธานจัดงานดังกล่าว มีดำริที่จะก่อตั้งองค์กรการกุศลที่เป็นของตัวแทนประกันชีวิตคนไทย 
+                                เพื่อฝึกตัวแทนเป็นผู้ให้ แบ่งปัน และมอบสิ่งดี ๆ คืนสู่สังคม ด้วยวิสัยทัศน์ของคุณมนตรี ที่เห็นว่าการเข้าถึงการศึกษาของเยาวชนคือพื้นฐานสำคัญที่สุด
+                                ในการพัฒนาเยาวชนไทยให้เจริญรุ่งหน้าเทียบกับอารยประเทศ
+                            </p>
+                            
+                            <h4 class="text-xl text-primary mt-6 mb-4">วัตถุประสงค์หลัก</h4>
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-start gap-3 text-foreground/80 text-[15px]">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm mt-0.5">1</span>
+                                    <span>สนับสนุนทุนการศึกษาแก่เด็กและเยาวชนผู้ขาดแคลนทั่วประเทศ</span>
+                                </li>
+                                <li class="flex items-start gap-3 text-foreground/80 text-[15px]">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm mt-0.5">2</span>
+                                    <span>จัดหาอุปกรณ์ทางการแพทย์ให้โรงพยาบาลของรัฐ</span>
+                                </li>
+                                <li class="flex items-start gap-3 text-foreground/80 text-[15px]">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm mt-0.5">3</span>
+                                    <span>สนับสนุนกิจกรรมเพื่อผู้พิการ ผู้ป่วย และผู้ด้อยโอกาส</span>
+                                </li>
+                                <li class="flex items-start gap-3 text-foreground/80 text-[15px]">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm mt-0.5">4</span>
+                                    <span>ส่งเสริมคุณธรรม จริยธรรม และจิตอาสาในสังคม</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <button onclick="toggleContent()" class="bg-primary text-white hover:bg-primary/90 rounded-full px-8 py-3 flex items-center gap-2 transition-all">
+                            <span id="btn-text">เพิ่มเติม</span>
+                            <svg id="chevron-down" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                            <svg id="chevron-up" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Partner Organizations Section -->
+        <section class="py-20 bg-gradient-to-b from-white to-secondary/10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header -->
+                <div class="text-center mb-16">
+                    <div class="inline-block mb-4 px-4 py-2 bg-primary/10 rounded-full">
+                        <span class="text-primary">ความร่วมมือ</span>
+                    </div>
+                    <h2 class="text-primary mb-4 text-4xl md:text-5xl">หน่วยงานที่เกี่ยวข้อง</h2>
+                    <p class="text-muted-foreground max-w-3xl mx-auto text-lg">
+                        มูลนิธิฯ ทำงานร่วมกับหน่วยงานและองค์กรชั้นนำในอุตสาหกรรมประกันภัยไทย
+                    </p>
+                </div>
+
+                <!-- Partners Grid -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Partner 1 -->
+                    <a href="https://www.tlaa.org/" target="_blank" rel="noopener noreferrer" class="block h-full">
+                        <div class="p-6 bg-white hover:shadow-xl transition-all duration-300 border border-border rounded-2xl group hover:border-primary/30 cursor-pointer hover:scale-105 h-full">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-primary/10 group-hover:border-primary/30 transition-colors p-1">
+                                    <img src="https://via.placeholder.com/56x56/233882/FFFFFF?text=TLAA" alt="TLAA" class="w-full h-full object-contain scale-150" />
+                                    <!-- Figma: figma:asset/55419f4df84303d466938f57deb5e2eaa23d12c1.png -->
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-primary mb-2 text-lg group-hover:underline text-[16px]">สมาคมประกันชีวิตไทย</h3>
+                                    <p class="text-muted-foreground text-sm leading-relaxed">
+                                        Thai Life Assurance Association (TLAA)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Partner 2 -->
+                    <a href="https://www.thaifa.or.th" target="_blank" rel="noopener noreferrer" class="block h-full">
+                        <div class="p-6 bg-white hover:shadow-xl transition-all duration-300 border border-border rounded-2xl group hover:border-primary/30 cursor-pointer hover:scale-105 h-full">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-primary/10 group-hover:border-primary/30 transition-colors p-1">
+                                    <img src="https://via.placeholder.com/56x56/233882/FFFFFF?text=THAIFA" alt="THAIFA" class="w-full h-full object-contain scale-150" />
+                                    <!-- Figma: figma:asset/f3ceeee0959e3228361aca4a4c0ed503e303e718.png -->
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-primary mb-2 text-lg group-hover:underline text-[16px]">สมาคมตัวแทนประกันชีวิตและที่ปรึกษาการเงิน</h3>
+                                    <p class="text-muted-foreground text-sm leading-relaxed">
+                                        The Life Insurance Agent & Financial Advisor Association (THAIFA)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Partner 3 -->
+                    <a href="https://www.gamathailand.org" target="_blank" rel="noopener noreferrer" class="block h-full">
+                        <div class="p-6 bg-white hover:shadow-xl transition-all duration-300 border border-border rounded-2xl group hover:border-primary/30 cursor-pointer hover:scale-105 h-full">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-primary/10 group-hover:border-primary/30 transition-colors p-1">
+                                    <img src="https://via.placeholder.com/56x56/233882/FFFFFF?text=GAMA" alt="GAMA" class="w-full h-full object-contain scale-150" />
+                                    <!-- Figma: figma:asset/79b906402e58e89e60edba0705075ba15b6a9e5a.png -->
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-primary mb-2 text-lg group-hover:underline text-[16px]">GAMA Thailand</h3>
+                                    <p class="text-muted-foreground text-sm leading-relaxed">
+                                        General Agents & Managers Association – Thailand
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Partner 4 -->
+                    <a href="https://www.tgia.org" target="_blank" rel="noopener noreferrer" class="block h-full">
+                        <div class="p-6 bg-white hover:shadow-xl transition-all duration-300 border border-border rounded-2xl group hover:border-primary/30 cursor-pointer hover:scale-105 h-full">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-primary/10 group-hover:border-primary/30 transition-colors p-1">
+                                    <img src="https://via.placeholder.com/56x56/233882/FFFFFF?text=TGIA" alt="TGIA" class="w-full h-full object-contain scale-150" />
+                                    <!-- Figma: figma:asset/7d4921276da62dcd14f88dfade6837d8f7a4b6a4.png -->
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-primary mb-2 text-lg group-hover:underline text-[16px]">สมาคมประกันวินาศภัยไทย</h3>
+                                    <p class="text-muted-foreground text-sm leading-relaxed">
+                                        Thai General Insurance Association (TGA / TGIA)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Partner 5 -->
+                    <a href="https://tiins.com/" target="_blank" rel="noopener noreferrer" class="block h-full">
+                        <div class="p-6 bg-white hover:shadow-xl transition-all duration-300 border border-border rounded-2xl group hover:border-primary/30 cursor-pointer hover:scale-105 h-full">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-primary/10 group-hover:border-primary/30 transition-colors p-1">
+                                    <img src="https://via.placeholder.com/56x56/233882/FFFFFF?text=TII" alt="TII" class="w-full h-full object-contain scale-150" />
+                                    <!-- Figma: figma:asset/7274ec0cefdbd0f2d32c1f9c1ccc4b156823cb42.png -->
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-primary mb-2 text-lg group-hover:underline text-[16px]">สถาบันประกันภัยไทย</h3>
+                                    <p class="text-muted-foreground text-sm leading-relaxed">
+                                        Thailand Insurance Institute (TII)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Partner 6 -->
+                    <a href="https://www.oic.or.th" target="_blank" rel="noopener noreferrer" class="block h-full">
+                        <div class="p-6 bg-white hover:shadow-xl transition-all duration-300 border border-border rounded-2xl group hover:border-primary/30 cursor-pointer hover:scale-105 h-full">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-primary/10 group-hover:border-primary/30 transition-colors p-1">
+                                    <img src="https://via.placeholder.com/56x56/233882/FFFFFF?text=OIC" alt="OIC" class="w-full h-full object-contain scale-150" />
+                                    <!-- Figma: figma:asset/8d311f95c78d098d5a1d10ba9158c17cc6536736.png -->
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-primary mb-2 text-lg group-hover:underline text-[16px]">สำนักงานคณะกรรมการกำกับและส่งเสริมการประกอบธุรกิจประกันภัย</h3>
+                                    <p class="text-muted-foreground text-sm leading-relaxed">
+                                        Office of Insurance Commission (OIC)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Bottom Note -->
+                <div class="mt-12 text-center">
+                    <p class="text-muted-foreground text-sm max-w-2xl mx-auto">
+                        การทำงานร่วมกันกับหน่วยงานเหล่านี้ช่วยให้มูลนิธิสามารถดำเนินภารกิจเพื่อสังคมได้อย่างมีประสิทธิภาพ
+                        และโปร่งใสตามมาตรฐานสากล
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Team Section with Tabs -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <div class="inline-block mb-4 px-6 py-2 bg-primary/10 rounded-full">
+                        <span class="text-primary">ทีมงาน</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl text-primary mb-4">
+                        บุคลากรมูลนิธิ
+                    </h2>
+                    <p class="text-muted-foreground max-w-3xl mx-auto text-lg">
+                        คณะกรรมการและทีมงานมูลนิธิที่ทุ่มเทเพื่อสังคม
+                    </p>
+                </div>
+                
+                <!-- Tab Navigation -->
+                <div class="flex justify-center mb-12">
+                    <div class="inline-flex bg-gray-100 rounded-full p-1.5 gap-1">
+                        <button onclick="switchTab('advisors')" id="tab-advisors" class="px-8 py-3 rounded-full font-medium transition-all duration-300 bg-primary text-white">
+                            ที่ปรึกษา
+                        </button>
+                        <button onclick="switchTab('executives')" id="tab-executives" class="px-8 py-3 rounded-full font-medium transition-all duration-300 text-gray-600 hover:text-primary">
+                            กรรมการบริหาร
+                        </button>
+                        <button onclick="switchTab('committee')" id="tab-committee" class="px-8 py-3 rounded-full font-medium transition-all duration-300 text-gray-600 hover:text-primary">
+                            คณะกรรมการ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Advisors -->
+                <div id="content-advisors" class="tab-content">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Advisor Cards -->
+                        <div class="bg-gradient-to-br from-white to-primary/5 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                            <div class="w-24 h-24 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl text-primary text-center mb-2">ชื่อที่ปรึกษา</h3>
+                            <p class="text-center text-accent mb-3">ตำแหน่ง</p>
+                            <p class="text-muted-foreground text-sm text-center leading-relaxed">
+                                รายละเอียดเกี่ยวกับที่ปรึกษา บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-primary/5 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                            <div class="w-24 h-24 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl text-primary text-center mb-2">ชื่อที่ปรึกษา</h3>
+                            <p class="text-center text-accent mb-3">ตำแหน่ง</p>
+                            <p class="text-muted-foreground text-sm text-center leading-relaxed">
+                                รายละเอียดเกี่ยวกับที่ปรึกษา บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-primary/5 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                            <div class="w-24 h-24 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl text-primary text-center mb-2">ชื่อที่ปรึกษา</h3>
+                            <p class="text-center text-accent mb-3">ตำแหน่ง</p>
+                            <p class="text-muted-foreground text-sm text-center leading-relaxed">
+                                รายละเอียดเกี่ยวกับที่ปรึกษา บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Executives -->
+                <div id="content-executives" class="tab-content hidden">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Executive Cards -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-primary/10 hover:border-primary/30">
+                            <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg text-primary text-center mb-1">ชื่อกรรมการบริหาร</h3>
+                            <p class="text-center text-accent text-sm mb-2">ประธานกรรมการ</p>
+                            <p class="text-muted-foreground text-xs text-center leading-relaxed">
+                                บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-primary/10 hover:border-primary/30">
+                            <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg text-primary text-center mb-1">ชื่อกรรมการบริหาร</h3>
+                            <p class="text-center text-accent text-sm mb-2">รองประธานกรรมการ</p>
+                            <p class="text-muted-foreground text-xs text-center leading-relaxed">
+                                บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-primary/10 hover:border-primary/30">
+                            <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg text-primary text-center mb-1">ชื่อกรรมการบริหาร</h3>
+                            <p class="text-center text-accent text-sm mb-2">เลขานุการ</p>
+                            <p class="text-muted-foreground text-xs text-center leading-relaxed">
+                                บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-primary/10 hover:border-primary/30">
+                            <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg text-primary text-center mb-1">ชื่อกรรมการบริหาร</h3>
+                            <p class="text-center text-accent text-sm mb-2">เหรัญญิก</p>
+                            <p class="text-muted-foreground text-xs text-center leading-relaxed">
+                                บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-primary/10 hover:border-primary/30">
+                            <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg text-primary text-center mb-1">ชื่อกรรมการบริหาร</h3>
+                            <p class="text-center text-accent text-sm mb-2">กรรมการ</p>
+                            <p class="text-muted-foreground text-xs text-center leading-relaxed">
+                                บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-primary/10 hover:border-primary/30">
+                            <div class="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg text-primary text-center mb-1">ชื่อกรรมการบริหาร</h3>
+                            <p class="text-center text-accent text-sm mb-2">กรรมการ</p>
+                            <p class="text-muted-foreground text-xs text-center leading-relaxed">
+                                บทบาทและความรับผิดชอบ
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Committee -->
+                <div id="content-committee" class="tab-content hidden">
+                    <div class="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        <!-- Committee Member Cards -->
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-white to-accent/5 p-6 rounded-xl shadow-md hover:shadow-lg transition-all text-center">
+                            <div class="w-16 h-16 bg-accent/10 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base text-primary mb-1">ชื่อกรรมการ</h3>
+                            <p class="text-accent text-xs">ตำแหน่ง</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            // Tab switching functionality
+            function switchTab(tabName) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Remove active state from all tabs
+                document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                    tab.classList.remove('bg-primary', 'text-white');
+                    tab.classList.add('text-gray-600');
+                });
+                
+                // Show selected tab content
+                document.getElementById('content-' + tabName).classList.remove('hidden');
+                
+                // Add active state to selected tab
+                const activeTab = document.getElementById('tab-' + tabName);
+                activeTab.classList.add('bg-primary', 'text-white');
+                activeTab.classList.remove('text-gray-600');
+            }
+        </script>
+
+    </main>
+
+    <!-- Footer (compact) -->
+    <footer class="bg-primary text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- About -->
+                <div>
+                    <div class="mb-6">
+                        <img src="https://via.placeholder.com/150x64/FFFFFF/FFFFFF?text=THAIFA" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
+                    </div>
+                    <p class="text-white/80 text-sm leading-relaxed mb-4">
+                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน มุ่งมั่นสร้างโอกาสและพัฒนาคุณภาพชีวิตของเด็กและเยาวชนไทย
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+                        <span class="text-white/90 text-sm">ขอบคุณที่ร่วมเคียงฝันไปด้วยกัน</span>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="mb-6 text-xl">เมนูหลัก</h3>
+                    <ul class="space-y-3">
+                        <li><a href="index.html" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
+                        <li><a href="about.html" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
+                        <li><a href="donate.html" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
+                        <li><a href="volunteer.html" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
+                        <li><a href="stories.html" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
+                        <li><a href="contact.html" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
+                    </ul>
+                </div>
+
+                <!-- Programs -->
+                <div>
+                    <h3 class="mb-6 text-xl">โครงการของเรา</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">ทุนการศึกษา</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">ช่วยเหลือเด็กกำพร้า</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">เครื่องมือแพทย์</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">กิจกรรมชุมชน</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">เสียงจากใจผู้รับ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="mb-6 text-xl">ติดต่อเรา</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span class="text-white/80 text-sm">
+                                อาคาร จูเวลเลอรี่ ห้อง 138/32 ชั้น 12<br />
+                                เลขที่ 138 ถนนนเรศ แขวงสี่พระยา<br />
+                                เขตบางรัก กรุงเทพฯ 10500
+                            </span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <span class="text-white/80 text-sm">thaifafoundation@gmail.com</span>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="pt-8 border-t border-white/10">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p class="text-white/60 text-sm text-center md:text-left">
+                        &copy; 2025 มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน (THAIFA Foundation). สงวนลิขสิทธิ์.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-6 text-sm">
+                        <a href="#" class="text-white/60 hover:text-accent transition-colors">นโยบายความเป็นส่วนตัว</a>
+                        <a href="#" class="text-white/60 hover:text-accent transition-colors">ข้อกำหนดการใช้งาน</a>
+                        <a href="#" class="text-white/60 hover:text-accent transition-colors">รายงานประจำปี</a>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-white/40 text-xs">
+                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน | เลขประจำตัวผู้เสียภาษีอากร: 0993000440226
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Contact Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="toggleFloatingContact()" class="bg-primary hover:bg-primary/90 text-white rounded-full px-5 py-4 shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+ class="bg-primary hover:bg-primary/90 text-white rounded-full px-5 py-4 shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <span class="text-sm">ติดต่อเรา</span>
+        </button>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onclick="if(event.target.id === 'contactModal') closeContactModal()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl text-primary">ติดต่อเรา</h3>
+                <button onclick="closeContactModal()" class="text-foreground/40 hover:text-foreground/80 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-foreground/70 mb-6">เลือกช่องทางที่คุณต้องการติดต่อ</p>
+            <div class="space-y-3">
+                <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
+                    <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-primary">อีเมล</div>
+                        <div class="text-sm text-foreground/60">thaifafoundation@gmail.com</div>
+                    </div>
+                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="https://www.facebook.com/share/1FdXqqJNXE/" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #1877F2;">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-primary">Facebook</div>
+                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
+                    </div>
+                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="https://line.me/R/ti/p/@519lkcsb" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #06C755;">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-primary">LINE</div>
+                        <div class="text-sm text-foreground/60">@519lkcsb</div>
+                    </div>
+                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="https://www.youtube.com/@THAIFAFoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #FF0000;">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-primary">YouTube</div>
+                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
+                    </div>
+                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="https://www.tiktok.com/@thaifafoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #000000;">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.10-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-primary">TikTok</div>
+                        <div class="text-sm text-foreground/60">@thaifafoundation</div>
+                    </div>
+                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="mt-6 pt-6 border-t border-border">
+                <p class="text-xs text-center text-foreground/50">เวลาทำการ: จันทร์-ศุกร์ 9:00-17:00 น.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isExpanded = false;
+        
+        function toggleContent() {
+            const content = document.getElementById('additional-content');
+            const btnText = document.getElementById('btn-text');
+            const chevronDown = document.getElementById('chevron-down');
+            const chevronUp = document.getElementById('chevron-up');
+            
+            isExpanded = !isExpanded;
+            
+            if (isExpanded) {
+                content.style.maxHeight = '1500px';
+                content.style.opacity = '1';
+                btnText.textContent = 'ซ่อน';
+                chevronDown.classList.add('hidden');
+                chevronUp.classList.remove('hidden');
+            } else {
+                content.style.maxHeight = '0';
+                content.style.opacity = '0';
+                btnText.textContent = 'เพิ่มเติม';
+                chevronDown.classList.remove('hidden');
+                chevronUp.classList.add('hidden');
+            }
+        }
+
+        function toggleFloatingContact() {
+            document.getElementById('contactModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeContactModal();
+        });
+    </script>
+
+</body>
+</html>
