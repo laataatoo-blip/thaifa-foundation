@@ -750,18 +750,6 @@
         </div>
     </footer>
 
-    <!-- Floating Contact Button -->
-<div class="fixed bottom-6 right-6 z-50">
-  <button
-    type="button"
-    onclick="toggleFloatingContact()"
-    class="bg-primary hover:bg-primary/90 text-white rounded-full px-5 py-4 shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
-    aria-label="ติดต่อเรา"
-  >
-    <span class="text-sm">ติดต่อเรา</span>
-  </button>
-</div>
-
     <!-- Contact Modal -->
     <div id="contactModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onclick="if(event.target.id === 'contactModal') closeContactModal()">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" onclick="event.stopPropagation()">
@@ -892,6 +880,8 @@
             if (e.key === 'Escape') closeContactModal();
         });
     </script>
-
+<link rel="stylesheet" href="assets/modal.css">
+<div id="contact-modal-mount"></div>
+<script src="assets/modal.js"></script>
 </body>
 </html>
