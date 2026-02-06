@@ -3,18 +3,6 @@
      วาง Contact Modal + Floating Button ด้านล่างก่อน </body>
      ========================================== -->
 
-<!-- Floating Contact Button -->
-<div class="fixed bottom-6 right-6 z-50">
-  <button
-    type="button"
-    onclick="toggleFloatingContact()"
-    class="bg-primary hover:bg-primary/90 text-white rounded-full px-5 py-4 shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
-    aria-label="ติดต่อเรา"
-  >
-    <span class="text-sm">ติดต่อเรา</span>
-  </button>
-</div>
-
 <!-- Contact Modal -->
 <div
   id="contactModal"
@@ -160,22 +148,5 @@
     alert('Mobile menu - Static HTML');
   }
 
-  function toggleFloatingContact() {
-    const modal = document.getElementById('contactModal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeContactModal() {
-    const modal = document.getElementById('contactModal');
-    if (!modal) return;
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
   // Close modal on ESC key
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeContactModal();
-  });
 </script>
