@@ -11,10 +11,10 @@
     error_reporting(E_ALL);
     class Database
     {
-        private $host = "";
-        private $uname = "";   
-        private $passwd = "";
-        private $dbname = "";
+        private $host = "localhost";
+        private $uname = "thaifa_fd";   
+        private $passwd = "*T52Ki6J*jsylalm";
+        private $dbname = "thaifa_fd";
 
         public $dbConn;
         public function __construct()
