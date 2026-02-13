@@ -83,6 +83,9 @@
         <div class="bg-secondary/30 border-b border-border">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-10 text-sm">
+                    
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-10 text-sm">
                     <div class="hidden md:flex items-center gap-6 text-foreground/80">
                         <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-2 hover:text-primary transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
