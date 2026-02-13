@@ -40,7 +40,7 @@
                     <!-- Right Side -->
                     <div class="flex items-center gap-4">
                         <!-- Shopping Cart -->
-                        <a href="cart.html" class="relative text-foreground/80 hover:text-primary transition-colors">
+                        <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
@@ -49,14 +49,14 @@
 
                         <!-- Auth Buttons -->
                         <div class="flex items-center gap-2 pl-4 border-l border-border">
-                            <a href="login.html" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
+                            <a href="login.php" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
                                 <span class="hidden sm:inline">เข้าสู่ระบบ</span>
                             </a>
                             <span class="text-foreground/40">/</span>
-                            <a href="register.html" class="text-foreground/80 hover:text-primary transition-colors">
+                            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
                                 <span class="hidden sm:inline">สมัครสมาชิก</span>
                             </a>
                         </div>
@@ -487,7 +487,7 @@
                 return;
             }
             alert('กำลังไปยังหน้าชำระเงิน...');
-            // window.location.href = 'checkout.html';
+            // window.location.href = 'checkout.php';
         }
 
         // Sync select-all checkboxes
