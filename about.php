@@ -132,11 +132,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo -->
-                <a href="index.php" class="flex-shrink-0">
-                    <img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto" />
-                </a>
+                    <a href="index.php" class="flex-shrink-0">
+                        <img src="assets/images/Logo.png" 
+                            alt="THAIFA Logo" class="h-20 w-auto" />
+                    </a>
+                    
+                    <a href="index.php" class="flex-shrink-0">
 
-                <!-- Desktop Navigation -->
+                    <!-- Desktop Navigation -->
                     <div class="hidden lg:flex items-center gap-1">
                         <a href="index.php"
                             class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md hover:bg-sky-100 transition-colors">หน้าแรก</a>
@@ -156,35 +159,18 @@
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ติดต่อเรา</a>
                     </div>
 
-                       class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">หน้าแรก</a>
-
-                    <!-- Active: About -->
-                    <a href="about.php"
-                       class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md hover:bg-sky-100 transition-colors">เกี่ยวกับเรา</a>
-
-                    <a href="calendar.php"
-                       class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ปฏิทิน</a>
-                    <a href="shop.php"
-                       class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ร้านค้า</a>
-                    <a href="donate.php"
-                       class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">การบริจาค</a>
-                    <a href="volunteer.php"
-                       class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">จิตอาสา</a>
-                    <a href="stories.php"
-                       class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เสียงจากใจ</a>
-                    <a href="contact.php"
-                       class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ติดต่อเรา</a>
+                    <!-- Mobile Menu Button -->
+                    <button class="lg:hidden p-2" onclick="toggleMobileMenu()">
+                        <div class="w-6 h-5 flex flex-col justify-between">
+                            <span class="w-full h-0.5 bg-primary"></span>
+                            <span class="w-full h-0.5 bg-primary"></span>
+                            <span class="w-full h-0.5 bg-primary"></span>
+                        </div>
+                    </button>
                 </div>
-
-                <!-- Mobile Menu Button -->
-                <button class="lg:hidden p-2" onclick="toggleMobileMenu()" aria-label="Open menu">
-                    <div class="w-6 h-5 flex flex-col justify-between">
-                        <span class="w-full h-0.5 bg-primary"></span>
-                        <span class="w-full h-0.5 bg-primary"></span>
-                        <span class="w-full h-0.5 bg-primary"></span>
-                    </div>
-                </button>
             </div>
+        </div>
+    </nav>
 
             <!-- Mobile Menu Panel -->
             <div id="mobileMenu" class="lg:hidden hidden pb-4">
