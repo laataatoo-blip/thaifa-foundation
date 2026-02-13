@@ -71,17 +71,17 @@
                 <div class="flex items-center justify-between h-20">
                     <a href="index.html" class="flex-shrink-0">
                         <img src="assets/images/Logo.png" 
-                            alt="THAIFA Logo" class="h-20 w-auto" /
+                            alt="THAIFA Logo" class="h-20 w-auto" />
                     </a>
                     <div class="hidden lg:flex items-center gap-1">
-                        <a href="index.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
-                        <a href="about.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
-                        <a href="calendar.html" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">ปฏิทิน</a>
-                        <a href="shop.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
-                        <a href="donate.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
-                        <a href="volunteer.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
-                        <a href="stories.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
-                        <a href="contact.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
+                        <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
+                        <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
+                        <a href="calendar.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">ปฏิทิน</a>
+                        <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
+                        <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
+                        <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
+                        <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
+                        <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
                     </div>
                 </div>
             </div>
