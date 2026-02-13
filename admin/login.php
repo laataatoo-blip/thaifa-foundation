@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
                         </form>
 
                         <div class="text-center mt-4">
-                            <small class="text-muted">© <?= date('Y') ?> School Hub System. All rights reserved.</small>
+                            <small class="text-muted">© <?= date('Y') ?>© 2026 มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน (THAIFA Foundation). สงวนลิขสิทธิ์.</small>
                         </div>
 
                     </div>
