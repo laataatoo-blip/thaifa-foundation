@@ -157,28 +157,28 @@
                     <!-- Logo -->
                     <a href="index.html" class="flex-shrink-0">
                         <img src="assets/images/Logo.png" 
-                            alt="THAIFA Logo" class="h-20 w-auto" /
+                            alt="THAIFA Logo" class="h-20 w-auto" />
                     </a>
                     
-                    <a href="index.html" class="flex-shrink-0">
+                    <a href="index.php" class="flex-shrink-0">
 
                     <!-- Desktop Navigation -->
                     <div class="hidden lg:flex items-center gap-1">
-                        <a href="index.html"
+                        <a href="index.php"
                             class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md hover:bg-sky-100 transition-colors">หน้าแรก</a>
-                        <a href="about.html"
+                        <a href="about.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เกี่ยวกับเรา</a>
-                        <a href="calendar.html"
+                        <a href="calendar.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ปฏิทิน</a>
-                        <a href="shop.html"
+                        <a href="shop.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ร้านค้า</a>
-                        <a href="donate.html"
+                        <a href="donate.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">การบริจาค</a>
-                        <a href="volunteer.html"
+                        <a href="volunteer.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">จิตอาสา</a>
-                        <a href="stories.html"
+                        <a href="stories.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เสียงจากใจ</a>
-                        <a href="contact.html"
+                        <a href="contact.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ติดต่อเรา</a>
                     </div>
 
