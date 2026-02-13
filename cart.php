@@ -90,7 +90,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl text-primary">ตะกร้าสินค้า</h1>
-                <a href="shop.html" class="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+                <a href="shop.php" class="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     <span class="hidden sm:inline">เลือกซื้อสินค้าต่อ</span>
                 </a>
@@ -340,12 +340,12 @@
                 <div>
                     <h3 class="mb-6 text-xl">เมนูหลัก</h3>
                     <ul class="space-y-3">
-                        <li><a href="index.html" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
-                        <li><a href="about.html" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
-                        <li><a href="donate.html" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
-                        <li><a href="volunteer.html" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
-                        <li><a href="stories.html" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
-                        <li><a href="contact.html" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
+                        <li><a href="index.php" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
+                        <li><a href="about.php" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
+                        <li><a href="donate.php" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
+                        <li><a href="volunteer.php" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
+                        <li><a href="stories.php" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
+                        <li><a href="contact.php" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
                     </ul>
                 </div>
                 <div>

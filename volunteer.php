@@ -24,13 +24,7 @@
 
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-        <div class="bg-secondary/30 border-b"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center justify-between h-10 text-sm"><div class="hidden md:flex items-center gap-6 text-foreground/80"><a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg><span>thaifafoundation@gmail.com</span></a></div><div class="flex items-center gap-4"><a href="cart.html" class="relative"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span></a><div class="flex items-center gap-2 pl-4 border-l"><a href="login.html" class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg><span class="hidden sm:inline">เข้าสู่ระบบ</span></a><span class="text-foreground/40">/</span><a href="register.html"><span class="hidden sm:inline">สมัครสมาชิก</span></a></div></div></div></div></div>
-        <div class="bg-white"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center justify-between h-20"><a href="index.html"><img src="https://via.placeholder.com/150x64/233882/FFFFFF?text=THAIFA" alt="THAIFA" class="h-16" /></a><div class="hidden lg:flex items-center gap-1"><a href="index.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a><a href="about.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a><a href="calendar.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a><a href="shop.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a><a href="donate.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a><a href="volunteer.html" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">จิตอาสา</a><a href="stories.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a><a href="contact.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a></div></div></div></div>
-    </nav>
-
-    <main class="pt-[120px]">
-        <!-- Hero Banner -->
-        <section class="relative h-[400px] bg-gradient-to-br from-primary via-primary to-primary/90 flex items-center justify-center overflow-hidden">
+        <div class="bg-secondary/30 border-b"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center justify-between h-10 text-sm"><div class="hidden md:flex items-center gap-6 text-foreground/80"><a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg><span>thaifafoundation@gmail.com</span></a></div><div class="flex items-center gap-4"><a href="cart.php" class="relative"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span></a><div class="flex items-center gap-2 pl-4 border-l"><a href="login.php" class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0_
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-20 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
                 <div class="absolute bottom-20 right-20 w-60 h-60 bg-accent rounded-full blur-3xl"></div>
@@ -244,12 +238,12 @@
                 <div>
                     <h3 class="mb-6 text-xl">เมนูหลัก</h3>
                     <ul class="space-y-3">
-                        <li><a href="index.html" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
-                        <li><a href="about.html" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
-                        <li><a href="donate.html" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
-                        <li><a href="volunteer.html" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
-                        <li><a href="stories.html" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
-                        <li><a href="contact.html" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
+                        <li><a href="index.php" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
+                        <li><a href="about.php" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
+                        <li><a href="donate.php" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
+                        <li><a href="volunteer.php" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
+                        <li><a href="stories.php" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
+                        <li><a href="contact.php" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
                     </ul>
                 </div>
 
