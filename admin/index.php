@@ -35,7 +35,7 @@
 		<div class="sidebar-wrapper" data-simplebar="true">
 			<div class="sidebar-header">
 				<div class="">
-					<img src="assets/images/logo.png" class="logo-icon-2" alt="" />
+					<img src="assets/images/Logo.png" class="logo-icon-2" alt="" />
 					<!-- แก้รูปโลโก้/ -->
 				</div>
 				<div>
