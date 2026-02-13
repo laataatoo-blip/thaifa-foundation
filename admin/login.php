@@ -16,7 +16,7 @@ if (isset($_SESSION['StaffLogin']['Username']) && isset($_SESSION['StaffLoginTyp
 $state = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
     
-    include('./backend/classes/DatabaseManagement.class.php');
+    include('../backend/classes/DatabaseManagement.class.php');
     // include('./backend/classes/Database.class.php'); // ปกติ DatabaseManagement มักจะ include Database มาแล้ว หรือ inherit มา
     $DB = new DatabaseManagement();
 
