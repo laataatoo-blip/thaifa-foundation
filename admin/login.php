@@ -1,3 +1,11 @@
+<?
+echo $_POST['username'];
+echo $_POST['password'];
+?>
+
+
+
+
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -179,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
                         </form>
 
                         <div class="text-center mt-4">
-                            <small class="text-muted">© <?= date('Y') ?>© 2026 มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน (THAIFA Foundation). สงวนลิขสิทธิ์.</small>
+                            <small class="text-muted">© 2026 มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน (THAIFA Foundation). สงวนลิขสิทธิ์.</small>
                         </div>
 
                     </div>
