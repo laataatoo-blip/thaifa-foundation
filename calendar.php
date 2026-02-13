@@ -107,7 +107,7 @@
 
         <!-- Calendar Section -->
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <iframe src="https://calendar.google.com/calendar/embed?src=8581e0fc31c85bc6a77b1b144c9d2c19c0bd905eb5d2e7a8c702b6e3009ccda8%40group.calendar.google.com&ctz=Asia%2FBangkok" style="border: 0" width="100%" height="1000" frameborder="0" scrolling="no"></iframe>
+            <iframe src="https://calendar.google.com/calendar/embed?src=8581e0fc31c85bc6a77b1b144c9d2c19c0bd905eb5d2e7a8c702b6e3009ccda8%40group.calendar.google.com&ctz=Asia%2FBangkok" style="border: 0" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
         </section>
     </main>
 
