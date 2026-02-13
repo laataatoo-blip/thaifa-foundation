@@ -1,6 +1,7 @@
 <?
-echo $_POST['username'];
-echo $_POST['password'];
+echo "username = ".$_POST['username'];
+echo "<br>";
+echo "password = ".$_POST['password'];
 ?>
 
 
