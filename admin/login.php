@@ -1,11 +1,3 @@
-<?
-echo "username = ".$_POST['username'];
-echo "<br>";
-echo "password = ".$_POST['password'];
-?>
-
-
-
 
 <?php
 ini_set('display_errors', 1);
@@ -31,12 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
     $username = trim($_POST['username']);
     $password = md5(trim($_POST['password'])); // *แนะนำเปลี่ยนเป็น password_verify ในอนาคต
 
-    $sql = "SELECT s.*, ut.UserTypeName 
-            FROM staff s 
-            INNER JOIN usertype ut ON s.UserTypeID = ut.UserTypeID 
-            WHERE s.Username = :username 
-              AND s.Password = :password
-              AND s.isActive = 'Y'";
+    $sql = "SELECT *
+            FROM admin 
+            WHERE Username = :username 
+              AND Password = :password
+              AND isActive = 'Y'";
     
     $param = [
         ':username' => $username,
@@ -48,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
     if ($StaffLogin) {
         // Login Success
         $_SESSION['StaffLogin'] = $StaffLogin;
-        $_SESSION['StaffLoginType']['SchoolHub'] = $StaffLogin['UserTypeID'];
 
         // Redirect
         $Redirect = "index.php";
