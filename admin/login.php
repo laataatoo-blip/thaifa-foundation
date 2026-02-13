@@ -140,8 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
                                 </div>
                             <?php endif; ?>
                             
-                            <h4 class="fw-bold text-dark">School Hub</h4>
-                            <p class="text-muted small">ระบบบริหารจัดการโรงเรียน</p>
+                            <h4 class="fw-bold text-dark">Thaifa FD Admin</h4>
+                            <p class="text-muted small">สำหรับแอดมินมูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน</p>
                         </div>
 
                         <?php if (isset($state) && $state == 'error') : ?>
