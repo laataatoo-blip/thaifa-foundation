@@ -37,7 +37,7 @@
                     <!-- Right Side -->
                     <div class="flex items-center gap-4">
                         <!-- Shopping Cart -->
-                        <a href="cart.html" class="relative text-foreground/80 hover:text-primary transition-colors">
+                        <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
@@ -46,14 +46,14 @@
 
                         <!-- Auth Buttons -->
                         <div class="flex items-center gap-2 pl-4 border-l border-border">
-                            <a href="login.html" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
+                            <a href="login.php" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
                                 <span class="hidden sm:inline">เข้าสู่ระบบ</span>
                             </a>
                             <span class="text-foreground/40">/</span>
-                            <a href="register.html" class="text-foreground/80 hover:text-primary transition-colors">
+                            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
                                 <span class="hidden sm:inline">สมัครสมาชิก</span>
                             </a>
                         </div>
@@ -66,16 +66,16 @@
         <div class="bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-20">
-                    <a href="index.html"><img src="https://via.placeholder.com/150x64/233882/FFFFFF?text=THAIFA" alt="THAIFA" class="h-16" /></a>
+                    <a href="index.php"><img src="assets/images/Logo.png" alt="THAIFA" class="h-16" /></a>
                     <div class="hidden lg:flex items-center gap-1">
-                        <a href="index.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
-                        <a href="about.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
-                        <a href="calendar.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a>
-                        <a href="shop.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
-                        <a href="donate.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
-                        <a href="volunteer.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
-                        <a href="stories.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
-                        <a href="contact.html" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
+                        <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
+                        <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
+                        <a href="calendar.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a>
+                        <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
+                        <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
+                        <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
+                        <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
+                        <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
                     </div>
                 </div>
             </div>
@@ -147,7 +147,7 @@
                     <!-- Register Link -->
                     <div class="text-center text-sm">
                         <span class="text-foreground/60">ยังไม่มีบัญชี?</span>
-                        <a href="register.html" class="text-primary hover:underline ml-1">สมัครสมาชิก</a>
+                        <a href="register.php" class="text-primary hover:underline ml-1">สมัครสมาชิก</a>
                     </div>
                 </form>
             </div>

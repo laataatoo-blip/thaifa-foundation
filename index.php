@@ -121,7 +121,7 @@
                     <!-- Right Side -->
                     <div class="flex items-center gap-4">
                         <!-- Shopping Cart -->
-                        <a href="cart.html" class="relative text-foreground/80 hover:text-primary transition-colors">
+                        <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -132,7 +132,7 @@
 
                         <!-- Auth Buttons -->
                         <div class="flex items-center gap-2 pl-4 border-l border-border">
-                            <a href="login.html"
+                            <a href="login.php"
                                 class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -141,7 +141,7 @@
                                 <span class="hidden sm:inline">เข้าสู่ระบบ</span>
                             </a>
                             <span class="text-foreground/40">/</span>
-                            <a href="register.html" class="text-foreground/80 hover:text-primary transition-colors">
+                            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
                                 <span class="hidden sm:inline">สมัครสมาชิก</span>
                             </a>
                         </div>
@@ -155,30 +155,30 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-20">
                     <!-- Logo -->
-                    <a href="index.html" class="flex-shrink-0">
+                    <a href="index.php" class="flex-shrink-0">
                         <img src="assets/images/Logo.png" 
-                            alt="THAIFA Logo" class="h-20 w-auto" /
+                            alt="THAIFA Logo" class="h-20 w-auto" />
                     </a>
                     
-                    <a href="index.html" class="flex-shrink-0">
+                    <a href="index.php" class="flex-shrink-0">
 
                     <!-- Desktop Navigation -->
                     <div class="hidden lg:flex items-center gap-1">
-                        <a href="index.html"
+                        <a href="index.php"
                             class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md hover:bg-sky-100 transition-colors">หน้าแรก</a>
-                        <a href="about.html"
+                        <a href="about.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เกี่ยวกับเรา</a>
-                        <a href="calendar.html"
+                        <a href="calendar.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ปฏิทิน</a>
-                        <a href="shop.html"
+                        <a href="shop.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ร้านค้า</a>
-                        <a href="donate.html"
+                        <a href="donate.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">การบริจาค</a>
-                        <a href="volunteer.html"
+                        <a href="volunteer.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">จิตอาสา</a>
-                        <a href="stories.html"
+                        <a href="stories.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เสียงจากใจ</a>
-                        <a href="contact.html"
+                        <a href="contact.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ติดต่อเรา</a>
                     </div>
 
@@ -221,7 +221,7 @@
                     
         <!-- CTA -->
         <div class="mt-8">
-            <a href="donate.html"
+            <a href="donate.php"
                 class="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-8 py-6 rounded-full text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -306,7 +306,7 @@
                             เพื่อช่วยเหลือเยาวชนขาดแคลน สนับสนุนทุนการศึกษา จัดหาอุปกรณ์ทางการแพทย์
                             และส่งเสริมกิจกรรมเพื่อสังคมอย่างต่อเนื่องมากว่า 20 ปี
                         </p>
-                        <a href="about.html"
+                        <a href="about.php"
                             class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-full px-8 py-3 transition-all">
                             เกี่ยวกับเราเพิ่มเติม
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,17 +473,17 @@
                 <div>
                     <h3 class="mb-6 text-xl">เมนูหลัก</h3>
                     <ul class="space-y-3">
-                        <li><a href="index.html"
+                        <li><a href="index.php"
                                 class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
-                        <li><a href="about.html"
+                        <li><a href="about.php"
                                 class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
-                        <li><a href="donate.html"
+                        <li><a href="donate.php"
                                 class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
-                        <li><a href="volunteer.html"
+                        <li><a href="volunteer.php"
                                 class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
-                        <li><a href="stories.html"
+                        <li><a href="stories.php"
                                 class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
-                        <li><a href="contact.html"
+                        <li><a href="contact.php"
                                 class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
                     </ul>
                 </div>
