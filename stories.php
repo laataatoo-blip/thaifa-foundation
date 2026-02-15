@@ -116,7 +116,7 @@
                     <div class="hidden lg:flex items-center gap-1">
                         <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
                         <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
-                        <a href="calendar.php" class="class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a>
+                        <a href="calendar.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a>
                         <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
                         <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
                         <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
