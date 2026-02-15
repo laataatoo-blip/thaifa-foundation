@@ -128,7 +128,7 @@
           <img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto" />
         </a>
 
-        <!-- เมนูโชว์ทันที (ไม่ซ่อนแล้ว) -->
+        <!-- เมนูโชว์ทันที -->
         <div class="flex items-center gap-1 flex-wrap">
           <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
           <a href="about.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">เกี่ยวกับเรา</a>
