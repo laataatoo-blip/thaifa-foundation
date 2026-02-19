@@ -4,7 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 
-$MM_authorizedUsers = "1,2,3,4";
+$MM_authorizedUsers = "Admin";
 $MM_donotCheckaccess = "false";
 include('./components/funcCheckSession.php');
 

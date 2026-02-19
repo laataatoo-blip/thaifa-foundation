@@ -7,7 +7,7 @@ session_start();
 
 // --- 1. Auto Login Logic ---
 // ตรวจสอบว่ามี Session เดิมอยู่แล้วหรือไม่ ถ้ามีให้ Redirect ไปเลย ไม่ต้อง Query ใหม่
-if (isset($_SESSION['StaffLogin']['Username']) && isset($_SESSION['StaffLoginType']['SchoolHub'])) {
+if (isset($_SESSION['AdminLogin']['Username']) && isset($_SESSION['AdminLoginType']['SchoolHub'])) {
     header("Location: index.php");
     exit;
 }
@@ -34,11 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
         ':password' => $password
     ];
 
-    $StaffLogin = $DB->selectOne($sql, $param);
+    $AdminLogin = $DB->selectOne($sql, $param);
 
-    if ($StaffLogin) {
+    if ($AdminLogin) {
         // Login Success
-        $_SESSION['StaffLogin'] = $StaffLogin;
+        $_SESSION['AdminLogin'] = $AdminLogin;
+        $_SESSION['AdminLoginType'] = ['Thaifa' => 'Admin']; // กำหนดประเภทการล็อกอิน
 
         // Redirect
         $Redirect = "index.php";

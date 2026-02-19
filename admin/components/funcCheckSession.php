@@ -29,7 +29,7 @@ function isAuthorized($strUsers, $strGroups, $UserName, $UserGroup)
 }
 
 $RedirectPath = "login.php";
-if (!isset($_SESSION['StaffLogin']) || isAuthorized($MM_donotCheckaccess, $MM_authorizedUsers, $_SESSION['StaffLogin']['StaffID'], $_SESSION['StaffLoginType']['SchoolHub']) == false) {
+if (!isset($_SESSION['AdminLogin']) || isAuthorized($MM_donotCheckaccess, $MM_authorizedUsers, $_SESSION['AdminLogin']['AdminID'], $_SESSION['AdminLoginType']['Thaifa']) == false) {
 	$MM_qsChar = "?";
 	$MM_referrer = $_SERVER['PHP_SELF'];
 	if (strpos($RedirectPath, "?")) $MM_qsChar = "&";
