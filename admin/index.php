@@ -55,7 +55,7 @@
 				</li>
 				<li class="menu-label">Web Apps</li>
 				<li>
-					<a href="emailbox.html">
+					<a href="news_list.php">
 						<div class="parent-icon icon-color-2"><i class="bx bx-envelope"></i>
 						</div>
 						<div class="menu-title">News</div>
