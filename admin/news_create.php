@@ -67,12 +67,54 @@ function dbLastInsertId($DB)
 $errors = [];
 $success = '';
 $showSuccessModal = false;
+$modalRedirect = 'news_list.php';
+
 $title = '';
 $detail = '';
 $posted_date = date('Y-m-d');
 $is_visible = 1;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$news_id_from_query = (int)($_GET['id'] ?? 0);
+
+// ===== ลบข่าว =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_news') {
+    $delete_news_id = (int)($_POST['delete_news_id'] ?? 0);
+
+    if ($delete_news_id <= 0) {
+        $errors[] = 'ไม่พบรหัสข่าวที่ต้องการลบ';
+    } else {
+        try {
+            // ลบไฟล์รูปจริงก่อน
+            $oldImages = $DB->selectAll(
+                "SELECT image_url FROM news_images WHERE news_id = :news_id",
+                [':news_id' => $delete_news_id]
+            );
+
+            if (!empty($oldImages)) {
+                foreach ($oldImages as $img) {
+                    $rel = trim((string)($img['image_url'] ?? ''));
+                    if ($rel !== '') {
+                        $abs = __DIR__ . '/' . ltrim($rel, '/');
+                        if (is_file($abs)) {
+                            @unlink($abs);
+                        }
+                    }
+                }
+            }
+
+            dbExec($DB, "DELETE FROM news_images WHERE news_id = {$delete_news_id}");
+            dbExec($DB, "DELETE FROM news WHERE id = {$delete_news_id} LIMIT 1");
+
+            $success = 'ลบข่าวเรียบร้อยแล้ว';
+            $showSuccessModal = true;
+            $modalRedirect = 'news_list.php';
+        } catch (Throwable $e) {
+            $errors[] = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
+        }
+    }
+
+// ===== สร้างข่าว =====
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $detail = trim($_POST['detail'] ?? '');
     $posted_date = trim($_POST['posted_date'] ?? date('Y-m-d'));
@@ -173,6 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $success = 'บันทึกข่าวเรียบร้อยแล้ว';
             $showSuccessModal = true;
+            $modalRedirect = 'news_list.php';
 
             // เคลียร์ฟอร์ม
             $title = '';
@@ -204,173 +247,197 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-    <div class="wrapper">
-        <?php include('./components/sidebar.php') ?>
-        <?php include('./components/navbar.php') ?>
+<div class="wrapper">
+    <?php include('./components/sidebar.php') ?>
+    <?php include('./components/navbar.php') ?>
 
-        <div class="page-wrapper">
-            <div class="page-content-wrapper page-content-margin-padding">
-                <div class="page-content page-content-margin-padding">
+    <div class="page-wrapper">
+        <div class="page-content-wrapper page-content-margin-padding">
+            <div class="page-content page-content-margin-padding">
 
-                    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-                        <div class="breadcrumb-title pe-3">News</div>
-                        <div class="ps-3">
-                            <nav aria-label="breadcrumb">
-                                <ol class="breadcrumb mb-0 p-0">
-                                    <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a></li>
-                                    <li class="breadcrumb-item"><a href="news_list.php">รายการข่าว</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">เพิ่มข่าว</li>
-                                </ol>
-                            </nav>
-                        </div>
+                <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+                    <div class="breadcrumb-title pe-3">News</div>
+                    <div class="ps-3">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0 p-0">
+                                <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a></li>
+                                <li class="breadcrumb-item"><a href="news_list.php">รายการข่าว</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">เพิ่มข่าว</li>
+                            </ol>
+                        </nav>
                     </div>
+                </div>
 
-                    <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                <?php foreach ($errors as $er): ?>
-                                    <li><?= h($er) ?></li>
-                                <?php endforeach; ?>
-                            </ul>
+                <?php if (!empty($errors)): ?>
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            <?php foreach ($errors as $er): ?>
+                                <li><?= h($er) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h4 class="mb-0">ฟอร์มสร้างข่าว</h4>
                         </div>
-                    <?php endif; ?>
+                        <hr />
 
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="card-title">
-                                <h4 class="mb-0">ฟอร์มสร้างข่าว</h4>
+                        <form method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="action" value="create_news">
+
+                            <div class="mb-3">
+                                <label class="form-label">หัวข้อข่าว <span class="text-danger">*</span></label>
+                                <input type="text" name="title" class="form-control" value="<?= h($title) ?>" required>
                             </div>
-                            <hr />
 
-                            <form method="post" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <label class="form-label">หัวข้อข่าว <span class="text-danger">*</span></label>
-                                    <input type="text" name="title" class="form-control" value="<?= h($title) ?>" required>
+                            <div class="mb-3">
+                                <label class="form-label">รายละเอียด <span class="text-danger">*</span></label>
+                                <textarea name="detail" class="form-control" rows="8" required><?= h($detail) ?></textarea>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">วันที่ลงข่าว <span class="text-danger">*</span></label>
+                                    <input type="date" name="posted_date" class="form-control" value="<?= h($posted_date) ?>" required>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">รายละเอียด <span class="text-danger">*</span></label>
-                                    <textarea name="detail" class="form-control" rows="8" required><?= h($detail) ?></textarea>
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">วันที่ลงข่าว <span class="text-danger">*</span></label>
-                                        <input type="date" name="posted_date" class="form-control" value="<?= h($posted_date) ?>" required>
-                                    </div>
-                                    <div class="col-md-4 d-flex align-items-end">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="is_visible" id="is_visible" <?= $is_visible ? 'checked' : '' ?>>
-                                            <label class="form-check-label" for="is_visible">แสดงข่าว</label>
-                                        </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="is_visible" id="is_visible" <?= $is_visible ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="is_visible">แสดงข่าว</label>
                                     </div>
                                 </div>
+                            </div>
 
-                                <hr>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h5 class="mb-0">รูปข่าว</h5>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="addImageBtn">+ เพิ่มแถวรูป</button>
-                                </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">รูปข่าว</h5>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="addImageBtn">+ เพิ่มแถวรูป</button>
+                            </div>
 
-                                <div id="imageRows">
-                                    <div class="image-row row g-2">
-                                        <div class="col-md-5">
-                                            <label class="form-label">ไฟล์รูป</label>
-                                            <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
-                                        </div>
-                                        <div class="col-md-5">
-                                            <label class="form-label">Alt text</label>
-                                            <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Sort</label>
-                                            <input type="number" name="image_sort[]" class="form-control" value="1" min="0">
-                                        </div>
+                            <div id="imageRows">
+                                <div class="image-row row g-2">
+                                    <div class="col-md-5">
+                                        <label class="form-label">ไฟล์รูป</label>
+                                        <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label">Alt text</label>
+                                        <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Sort</label>
+                                        <input type="number" name="image_sort[]" class="form-control" value="1" min="0">
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="mt-3 d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary">บันทึกข่าว</button>
-                                    <a href="news_list.php" class="btn btn-light">ยกเลิก</a>
-                                </div>
-                            </form>
-                        </div>
+                            <div class="mt-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">บันทึกข่าว</button>
+                                <a href="news_list.php" class="btn btn-light">ยกเลิก</a>
+
+                                <?php if ($news_id_from_query > 0): ?>
+                                    <button type="button" class="btn btn-danger" id="btnDeleteNews">ลบข่าวนี้</button>
+                                <?php endif; ?>
+                            </div>
+                        </form>
+
+                        <?php if ($news_id_from_query > 0): ?>
+                        <form method="post" id="deleteNewsForm" class="d-none">
+                            <input type="hidden" name="action" value="delete_news">
+                            <input type="hidden" name="delete_news_id" value="<?= (int)$news_id_from_query ?>">
+                        </form>
+                        <?php endif; ?>
                     </div>
-
                 </div>
+
             </div>
         </div>
     </div>
+</div>
 
-    <div class="overlay toggle-btn-mobile"></div>
-    <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+<div class="overlay toggle-btn-mobile"></div>
+<a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
 
-    <?php if ($showSuccessModal): ?>
-    <div class="modal fade" id="saveSuccessModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">บันทึกสำเร็จ</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <?= h($success) ?>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">ตกลง</button>
-                </div>
+<?php if ($showSuccessModal): ?>
+<div class="modal fade" id="saveSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">สำเร็จ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <?= h($success) ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">ตกลง</button>
             </div>
         </div>
     </div>
-    <?php endif; ?>
+</div>
+<?php endif; ?>
 
-    <?php include('./structure/script.php') ?>
+<?php include('./structure/script.php') ?>
 
-    <script>
-        (function() {
-            const addBtn = document.getElementById('addImageBtn');
-            const box = document.getElementById('imageRows');
+<script>
+(function() {
+    const addBtn = document.getElementById('addImageBtn');
+    const box = document.getElementById('imageRows');
 
-            addBtn.addEventListener('click', function() {
-                const idx = box.querySelectorAll('.image-row').length + 1;
-                const row = document.createElement('div');
-                row.className = 'image-row row g-2';
-                row.innerHTML = `
-                    <div class="col-md-5">
-                        <label class="form-label">ไฟล์รูป</label>
-                        <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
-                    </div>
-                    <div class="col-md-5">
-                        <label class="form-label">Alt text</label>
-                        <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Sort</label>
-                        <input type="number" name="image_sort[]" class="form-control" value="${idx}" min="0">
-                    </div>
-                `;
-                box.appendChild(row);
-            });
-        })();
+    addBtn.addEventListener('click', function() {
+        const idx = box.querySelectorAll('.image-row').length + 1;
+        const row = document.createElement('div');
+        row.className = 'image-row row g-2';
+        row.innerHTML = `
+            <div class="col-md-5">
+                <label class="form-label">ไฟล์รูป</label>
+                <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Alt text</label>
+                <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Sort</label>
+                <input type="number" name="image_sort[]" class="form-control" value="${idx}" min="0">
+            </div>
+        `;
+        box.appendChild(row);
+    });
+})();
 
-        <?php if ($showSuccessModal): ?>
-        (function() {
-            var el = document.getElementById('saveSuccessModal');
-            if (!el || typeof bootstrap === 'undefined') return;
+(function () {
+    var btnDel = document.getElementById('btnDeleteNews');
+    var formDel = document.getElementById('deleteNewsForm');
+    if (!btnDel || !formDel) return;
 
-            var modal = new bootstrap.Modal(el, {
-                backdrop: 'static',
-                keyboard: false
-            });
+    btnDel.addEventListener('click', function () {
+        if (confirm('ยืนยันการลบข่าวนี้ใช่หรือไม่?')) {
+            formDel.submit();
+        }
+    });
+})();
 
-            el.addEventListener('hidden.bs.modal', function() {
-                window.location.href = 'news_list.php';
-            });
+<?php if ($showSuccessModal): ?>
+(function() {
+    var el = document.getElementById('saveSuccessModal');
+    if (!el || typeof bootstrap === 'undefined') return;
 
-            modal.show();
-        })();
-        <?php endif; ?>
-    </script>
+    var modal = new bootstrap.Modal(el, {
+        backdrop: 'static',
+        keyboard: false
+    });
+
+    el.addEventListener('hidden.bs.modal', function() {
+        window.location.href = <?= json_encode($modalRedirect) ?>;
+    });
+
+    modal.show();
+})();
+<?php endif; ?>
+</script>
 </body>
-
 </html>
