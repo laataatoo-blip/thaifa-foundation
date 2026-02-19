@@ -101,15 +101,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dateEsc = dbEscape($DB, $posted_date);
 
             $sqlNews = "
-                INSERT INTO news (title, detail, posted_date, admin_id, is_visible)
-                VALUES ('{$titleEsc}', '{$detailEsc}', '{$dateEsc}', {$admin_id}, {$is_visible})
-            ";
-            dbExec($DB, $sqlNews);
+    INSERT INTO news (title, detail, posted_date, admin_id, is_visible)
+    VALUES ('{$titleEsc}', '{$detailEsc}', '{$dateEsc}', {$admin_id}, {$is_visible})
+";
+            $insertResult = dbExec($DB, $sqlNews);
 
+            if ($insertResult === false) {
+                throw new Exception('บันทึกข่าวไม่สำเร็จ (INSERT news failed)');
+            }
+
+            // วิธีหลัก
             $news_id = dbLastInsertId($DB);
+
+            // Fallback: ถ้า class DB คืน lastInsertId ไม่ได้ ให้หา record ล่าสุดของ admin คนนี้
+            if ($news_id <= 0) {
+                $row = $DB->selectOne(
+                    "SELECT id FROM news WHERE admin_id = :admin_id ORDER BY id DESC LIMIT 1",
+                    [':admin_id' => $admin_id]
+                );
+                $news_id = (int)($row['id'] ?? 0);
+            }
+
             if ($news_id <= 0) {
                 throw new Exception('ไม่สามารถสร้างข่าวได้ (ไม่พบ news_id)');
             }
+
 
             // อัปโหลดรูปหลายรูป
             if (!empty($_FILES['images']['name'][0])) {
