@@ -458,7 +458,7 @@
                 <!-- About -->
                 <div>
                     <div class="mb-6">
-                        <img src="img/THAIFA Logo.jpg" alt="THAIFA Logo"
+                        <img src="assets/images/Logo.png" alt="THAIFA Logo"
                             class="h-16 w-auto brightness-0 invert" />
                     </div>
                     <p class="text-white/80 text-sm leading-relaxed mb-4">
