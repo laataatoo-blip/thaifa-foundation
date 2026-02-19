@@ -201,6 +201,7 @@
     </div>
   </div>
 </div>
+</nav>
 
     <!-- Main Content with pt-[120px] -->
     <main class="pt-[120px]">
@@ -707,6 +708,7 @@
     if (e.key === 'Escape') closeContactModal();
   });
 </script>
+
 
 
 
