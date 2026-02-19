@@ -152,15 +152,11 @@
 
         <!-- Main Navigation -->
         <div class="bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-20">
-                    <!-- Logo -->
-                    <a href="index.php" class="flex-shrink-0">
-                        <img src="assets/images/Logo.png" 
-                            alt="THAIFA Logo" class="h-20 w-auto" />
-                    </a>
-                    
-                    <a href="index.php" class="flex-shrink-0">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      <a href="index.php" class="flex-shrink-0">
+        <img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto" />
+      </a>
 
                     <!-- Desktop Navigation -->
                     <div class="hidden lg:flex items-center gap-1">
@@ -184,64 +180,73 @@
 
                     <!-- Mobile Menu Button -->
                     <button class="lg:hidden p-2" onclick="toggleMobileMenu()">
-                        <div class="w-6 h-5 flex flex-col justify-between">
-                            <span class="w-full h-0.5 bg-primary"></span>
-                            <span class="w-full h-0.5 bg-primary"></span>
-                            <span class="w-full h-0.5 bg-primary"></span>
-                        </div>
-                    </button>
-                </div>
-            </div>
+        <div class="w-6 h-5 flex flex-col justify-between">
+          <span class="w-full h-0.5 bg-primary"></span>
+          <span class="w-full h-0.5 bg-primary"></span>
+          <span class="w-full h-0.5 bg-primary"></span>
         </div>
-    </nav>
+      </button>
+    </div>
+
+                    <!-- Mobile Menu -->
+                    <div id="mobileMenu" class="lg:hidden hidden border-t border-border bg-white">
+      <a href="index.php" class="block px-4 py-3 border-b border-border">หน้าแรก</a>
+      <a href="about.php" class="block px-4 py-3 border-b border-border">เกี่ยวกับเรา</a>
+      <a href="calendar.php" class="block px-4 py-3 border-b border-border">ปฏิทิน</a>
+      <a href="shop.php" class="block px-4 py-3 border-b border-border">ร้านค้า</a>
+      <a href="donate.php" class="block px-4 py-3 border-b border-border">การบริจาค</a>
+      <a href="volunteer.php" class="block px-4 py-3 border-b border-border">จิตอาสา</a>
+      <a href="stories.php" class="block px-4 py-3 border-b border-border">เสียงจากใจ</a>
+      <a href="contact.php" class="block px-4 py-3">ติดต่อเรา</a>
+    </div>
+  </div>
+</div>
 
     <!-- Main Content with pt-[120px] -->
     <main class="pt-[120px]">
 
         <!-- Hero Section -->
         <section id="home" class="relative min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden">
-  
+
             <!-- Background Image (เต็มจอเสมอ) -->
             <img
-                src="assets/images/cover.png" 
-                alt="cover" 
+                src="assets/images/cover.png"
+                alt="cover"
                 class="absolute inset-0 z-0 w-full h-full object-cover" />
-        <!-- Content -->
-        <div class="relative z-20 w-full">
-            <div class="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 py-20">
-                <div class="max-w-5xl">
-                    
-        <!-- Headline Image -->
-        <img
-            src="assets/images/หนึ่งความรักจากฉัน หมื่นพันความรักฝันของเธอ.png"
-            alt="หนึ่งความรักจากฉัน หมื่นพันความฝันของเธอ"
-            class="w-full max-w-[800px] h-auto object-contain"
-        />
-                </div>
-                    
-        <!-- CTA -->
-        <div class="mt-8">
-            <a href="donate.php"
-                class="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-8 py-6 rounded-full text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            ร่วมบริจาค
-            </a>
-        </div>
-    </div>
-</div>
-</div>
+            <!-- Content -->
+            <div class="relative z-20 w-full">
+                <div class="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 py-20">
+                    <div class="max-w-5xl">
 
-<!-- Hands Giving Heart -->
-<div class="absolute bottom-0 right-0 z-20 w-[400px] sm:w-[480px] lg:w-[580px] xl:w-[680px]">
-    <img src="assets/images/hands.png" 
-        alt=""
-        class="w-full h-auto object-contain object-bottom object-right" 
-    />
-</div>
-</section>
+                        <!-- Headline Image -->
+                        <img
+                            src="assets/images/หนึ่งความรักจากฉัน หมื่นพันความรักฝันของเธอ.png"
+                            alt="หนึ่งความรักจากฉัน หมื่นพันความฝันของเธอ"
+                            class="w-full max-w-[800px] h-auto object-contain" />
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="mt-8">
+                        <a href="donate.php"
+                            class="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-8 py-6 rounded-full text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            ร่วมบริจาค
+                        </a>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Hands Giving Heart -->
+            <div class="absolute bottom-0 right-0 z-20 w-[400px] sm:w-[480px] lg:w-[580px] xl:w-[680px]">
+                <img src="assets/images/hands.png"
+                    alt=""
+                    class="w-full h-auto object-contain object-bottom object-right" />
+            </div>
+        </section>
 
 
         <!-- Quick Stats Section -->
@@ -317,7 +322,7 @@
                     </div>
                     <div class="relative">
                         <div class="relative rounded-3xl overflow-hidden shadow-2xl">
-                            <img src="assets/images/APLIC 6 Conference.jpg" 
+                            <img src="assets/images/APLIC 6 Conference.jpg"
                                 alt="APLIC 6 Conference"
                                 class="w-full h-[600px] object-cover" />
                             <!-- Figma: figma:asset/f6662b9721b933ec86972122ebf7d9511d690faf.png -->
@@ -682,9 +687,28 @@
     </div>
 
     <script>
-        function toggleMobileMenu() {
-            alert('Mobile menu - Static HTML');
-        }
+  function toggleMobileMenu() {
+    const el = document.getElementById('mobileMenu');
+    if (!el) return;
+    el.classList.toggle('hidden');
+  }
+
+  function toggleFloatingContact() {
+    document.getElementById('contactModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeContactModal() {
+    document.getElementById('contactModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeContactModal();
+  });
+</script>
+
+
 
         function toggleFloatingContact() {
             document.getElementById('contactModal').classList.remove('hidden');
@@ -696,7 +720,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        document.addEventListener('keydown', function (e) {
+        document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeContactModal();
         });
     </script>
