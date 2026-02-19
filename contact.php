@@ -139,6 +139,33 @@
 
     <main class="pt-[120px]">
 
+    <main class="pt-[120px]">
+        <!-- Hero Banner -->
+        <section class="relative h-[300px] bg-gradient-to-br from-primary to-primary/90 flex items-center justify-center">
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-10 left-20 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+                <div class="absolute bottom-10 right-20 w-40 h-40 bg-accent rounded-full blur-3xl"></div>
+            </div>
+            <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
+                <h1 class="text-5xl md:text-6xl mb-4">ติดต่อเรา</h1>
+                <p class="text-xl text-white/90">เรายินดีรับฟังและให้บริการทุกท่าน</p>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="py-20 bg-gradient-to-b from-white to-secondary/10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header -->
+                <div class="text-center mb-16">
+                    <div class="inline-block mb-4 px-6 py-2 bg-primary/10 rounded-full">
+                        <span class="text-primary">ติดต่อเรา</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl text-primary mb-4">THAIFA FOUNDATION</h2>
+                    <p class="text-lg text-foreground/80 max-w-3xl mx-auto leading-relaxed">
+                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน<br />
+                        <span class="text-accent">ส่งต่อโอกาสทางการศึกษาให้เยาวชนไทย ด้วยหัวใจแห่งความเมตตา</span>
+                    </p>
+                </div>
                 <!-- Main Content Grid -->
                 <div class="grid lg:grid-cols-2 gap-8 mb-12">
                     <!-- Left Side - Office Info -->
