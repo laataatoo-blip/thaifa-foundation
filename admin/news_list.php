@@ -55,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
         $errors[] = 'ไม่พบรหัสข่าวที่ต้องการลบ';
     } else {
         try {
-            // โหลดรูปเพื่อไปลบไฟล์จริง
             $imgs = $DB->selectAll(
                 "SELECT image_url FROM news_images WHERE news_id = :news_id",
                 [':news_id' => $deleteId]
@@ -73,9 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
                 }
             }
 
-            // ลบรายการรูป + ลบข่าว
-            $DB->query("DELETE FROM news_images WHERE news_id = {$deleteId}");
-            $DB->query("DELETE FROM news WHERE id = {$deleteId} LIMIT 1");
+            if (method_exists($DB, 'query')) {
+                $DB->query("DELETE FROM news_images WHERE news_id = {$deleteId}");
+                $DB->query("DELETE FROM news WHERE id = {$deleteId} LIMIT 1");
+            } else {
+                $DB->execute("DELETE FROM news_images WHERE news_id = {$deleteId}");
+                $DB->execute("DELETE FROM news WHERE id = {$deleteId} LIMIT 1");
+            }
 
             $success = 'ลบข่าวเรียบร้อยแล้ว';
         } catch (Throwable $e) {
@@ -177,10 +180,6 @@ $newsRows = $DB->selectAll("
                     </div>
                 <?php endif; ?>
 
-                <?php if ($success !== ''): ?>
-                    <div class="alert alert-success"><?= h($success) ?></div>
-                <?php endif; ?>
-
                 <div class="card">
                     <div class="card-body">
                         <div class="card-title">
@@ -250,9 +249,10 @@ $newsRows = $DB->selectAll("
                                                 <a href="news_view.php?id=<?= $id ?>" class="btn btn-outline-primary btn-sm">ดู</a>
                                                 <a href="news_edit.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">แก้ไข</a>
 
-                                                <form method="post" class="d-inline" onsubmit="return confirm('ยืนยันการลบข่าวนี้ใช่หรือไม่?');">
+                                                <form method="post" class="d-inline js-delete-form">
                                                     <input type="hidden" name="action" value="delete_news">
                                                     <input type="hidden" name="delete_news_id" value="<?= $id ?>">
+                                                    <input type="hidden" name="news_title" value="<?= h($row['title']) ?>">
                                                     <button type="submit" class="btn btn-outline-danger btn-sm">ลบ</button>
                                                 </form>
                                             </div>
@@ -278,6 +278,7 @@ $newsRows = $DB->selectAll("
 
 <script src="assets/plugins/datatable/js/jquery.dataTables.min.js"></script>
 <script src="assets/plugins/datatable/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(document).ready(function () {
@@ -301,6 +302,38 @@ $(document).ready(function () {
             }
         }
     });
+
+    $(document).on('submit', '.js-delete-form', function (e) {
+        e.preventDefault();
+        const form = this;
+        const title = form.querySelector('input[name="news_title"]')?.value || '';
+
+        Swal.fire({
+            title: 'ยืนยันการลบข่าว',
+            html: `คุณต้องการลบข่าวนี้ใช่หรือไม่?<br><b>${title}</b>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ลบเลย',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+
+    <?php if ($success !== ''): ?>
+    Swal.fire({
+        icon: 'success',
+        title: 'สำเร็จ',
+        text: <?= json_encode($success) ?>,
+        confirmButtonText: 'ตกลง',
+        timer: 1800
+    });
+    <?php endif; ?>
 });
 </script>
 </body>
