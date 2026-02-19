@@ -122,15 +122,11 @@
 
         <!-- Main Navigation -->
         <div class="bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-20">
-                    <!-- Logo -->
-                    <a href="index.php" class="flex-shrink-0">
-                        <img src="assets/images/Logo.png" 
-                            alt="THAIFA Logo" class="h-20 w-auto" />
-                    </a>
-                    
-                    <a href="index.php" class="flex-shrink-0">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      <a href="index.php" class="flex-shrink-0">
+        <img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto" />
+      </a>
 
                     <!-- Desktop Navigation -->
                     <div class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">
@@ -147,23 +143,35 @@
                         <a href="volunteer.php"
                             class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">จิตอาสา</a>
                         <a href="stories.php"
-                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เสียงจากใจ</a>
+                            class=>เสียงจากใจ</a>
                         <a href="contact.php"
                             class="hidden lg:flex items-center gap-1">ติดต่อเรา</a>
                     </div>
 
                     <!-- Mobile Menu Button -->
                     <button class="lg:hidden p-2" onclick="toggleMobileMenu()">
-                        <div class="w-6 h-5 flex flex-col justify-between">
-                            <span class="w-full h-0.5 bg-primary"></span>
-                            <span class="w-full h-0.5 bg-primary"></span>
-                            <span class="w-full h-0.5 bg-primary"></span>
-                        </div>
-                    </button>
-                </div>
-            </div>
+        <div class="w-6 h-5 flex flex-col justify-between">
+          <span class="w-full h-0.5 bg-primary"></span>
+          <span class="w-full h-0.5 bg-primary"></span>
+          <span class="w-full h-0.5 bg-primary"></span>
         </div>
-    </nav>
+      </button>
+    </div>
+
+                    <!-- Mobile Menu -->
+                    <div id="mobileMenu" class="lg:hidden hidden border-t border-border bg-white">
+      <a href="index.php" class="block px-4 py-3 border-b border-border">หน้าแรก</a>
+      <a href="about.php" class="block px-4 py-3 border-b border-border">เกี่ยวกับเรา</a>
+      <a href="calendar.php" class="block px-4 py-3 border-b border-border">ปฏิทิน</a>
+      <a href="shop.php" class="block px-4 py-3 border-b border-border">ร้านค้า</a>
+      <a href="donate.php" class="block px-4 py-3 border-b border-border">การบริจาค</a>
+      <a href="volunteer.php" class="block px-4 py-3 border-b border-border">จิตอาสา</a>
+      <a href="stories.php" class="block px-4 py-3 border-b border-border">เสียงจากใจ</a>
+      <a href="contact.php" class="block px-4 py-3">ติดต่อเรา</a>
+    </div>
+  </div>
+</div>
+</nav>
 
                 <!-- Main Content Grid -->
                 <div class="grid lg:grid-cols-2 gap-8 mb-12">
