@@ -66,6 +66,7 @@ function dbLastInsertId($DB)
 
 $errors = [];
 $success = '';
+$showSuccessModal = false;
 $title = '';
 $detail = '';
 $posted_date = date('Y-m-d');
@@ -93,7 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'ไม่พบผู้ใช้งานที่ล็อกอิน (admin_id)';
     }
 
-
     if (empty($errors)) {
         try {
             $titleEsc = dbEscape($DB, $title);
@@ -101,9 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dateEsc = dbEscape($DB, $posted_date);
 
             $sqlNews = "
-    INSERT INTO news (title, detail, posted_date, admin_id, is_visible)
-    VALUES ('{$titleEsc}', '{$detailEsc}', '{$dateEsc}', {$admin_id}, {$is_visible})
-";
+                INSERT INTO news (title, detail, posted_date, admin_id, is_visible)
+                VALUES ('{$titleEsc}', '{$detailEsc}', '{$dateEsc}', {$admin_id}, {$is_visible})
+            ";
             $insertResult = dbExec($DB, $sqlNews);
 
             if ($insertResult === false) {
@@ -125,7 +125,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($news_id <= 0) {
                 throw new Exception('ไม่สามารถสร้างข่าวได้ (ไม่พบ news_id)');
             }
-
 
             // อัปโหลดรูปหลายรูป
             if (!empty($_FILES['images']['name'][0])) {
@@ -173,6 +172,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $success = 'บันทึกข่าวเรียบร้อยแล้ว';
+            $showSuccessModal = true;
+
+            // เคลียร์ฟอร์ม
             $title = '';
             $detail = '';
             $posted_date = date('Y-m-d');
@@ -231,10 +233,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <?php endforeach; ?>
                             </ul>
                         </div>
-                    <?php endif; ?>
-
-                    <?php if ($success !== ''): ?>
-                        <div class="alert alert-success"><?= h($success) ?></div>
                     <?php endif; ?>
 
                     <div class="card">
@@ -307,6 +305,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="overlay toggle-btn-mobile"></div>
     <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
 
+    <?php if ($showSuccessModal): ?>
+    <div class="modal fade" id="saveSuccessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">บันทึกสำเร็จ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?= h($success) ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">ตกลง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?php include('./structure/script.php') ?>
 
     <script>
@@ -319,22 +336,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const row = document.createElement('div');
                 row.className = 'image-row row g-2';
                 row.innerHTML = `
-            <div class="col-md-5">
-                <label class="form-label">ไฟล์รูป</label>
-                <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
-            </div>
-            <div class="col-md-5">
-                <label class="form-label">Alt text</label>
-                <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Sort</label>
-                <input type="number" name="image_sort[]" class="form-control" value="${idx}" min="0">
-            </div>
-        `;
+                    <div class="col-md-5">
+                        <label class="form-label">ไฟล์รูป</label>
+                        <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Alt text</label>
+                        <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sort</label>
+                        <input type="number" name="image_sort[]" class="form-control" value="${idx}" min="0">
+                    </div>
+                `;
                 box.appendChild(row);
             });
         })();
+
+        <?php if ($showSuccessModal): ?>
+        (function() {
+            var el = document.getElementById('saveSuccessModal');
+            if (!el || typeof bootstrap === 'undefined') return;
+
+            var modal = new bootstrap.Modal(el, {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            el.addEventListener('hidden.bs.modal', function() {
+                window.location.href = 'news_list.php';
+            });
+
+            modal.show();
+        })();
+        <?php endif; ?>
     </script>
 </body>
 
