@@ -14,14 +14,16 @@ $DB = new DatabaseManagement();
 /**
  * Escape helper
  */
-function h($str) {
+function h($str)
+{
     return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8');
 }
 
 /**
  * Try best to escape for SQL string
  */
-function dbEscape($DB, $value) {
+function dbEscape($DB, $value)
+{
     $value = (string)$value;
 
     if (method_exists($DB, 'escape')) {
@@ -40,7 +42,8 @@ function dbEscape($DB, $value) {
 /**
  * Execute query (รองรับหลายคลาส)
  */
-function dbExec($DB, $sql) {
+function dbExec($DB, $sql)
+{
     if (method_exists($DB, 'query')) return $DB->query($sql);
     if (method_exists($DB, 'execute')) return $DB->execute($sql);
     if (method_exists($DB, 'selectAll')) return $DB->selectAll($sql); // fallback
@@ -50,7 +53,8 @@ function dbExec($DB, $sql) {
 /**
  * Get last insert id (รองรับหลายคลาส)
  */
-function dbLastInsertId($DB) {
+function dbLastInsertId($DB)
+{
     if (method_exists($DB, 'lastInsertId')) return (int)$DB->lastInsertId();
     if (property_exists($DB, 'conn') && is_object($DB->conn) && isset($DB->conn->insert_id)) return (int)$DB->conn->insert_id;
     if (method_exists($DB, 'selectAll')) {
@@ -74,13 +78,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $is_visible = isset($_POST['is_visible']) ? 1 : 0;
 
     $admin_id = 0;
-    if (isset($_SESSION['AdminID'])) $admin_id = (int)$_SESSION['AdminID'];
-    if ($admin_id <= 0 && isset($_SESSION['StaffLogin']['StaffID'])) $admin_id = (int)$_SESSION['StaffLogin']['StaffID'];
 
-    if ($title === '') $errors[] = 'กรุณากรอกหัวข้อข่าว';
-    if ($detail === '') $errors[] = 'กรุณากรอกรายละเอียด';
-    if ($posted_date === '') $errors[] = 'กรุณาเลือกวันที่ลงข่าว';
-    if ($admin_id <= 0) $errors[] = 'ไม่พบผู้ใช้งานที่ล็อกอิน (admin_id)';
+    // โครงสร้าง session จากหน้า login
+    if (isset($_SESSION['AdminLogin']) && is_array($_SESSION['AdminLogin'])) {
+        $admin_id = (int)($_SESSION['AdminLogin']['AdminID'] ?? 0);
+    }
+
+    // fallback
+    if ($admin_id <= 0) {
+        $admin_id = (int)($_SESSION['AdminID'] ?? 0);
+    }
+
+    if ($admin_id <= 0) {
+        $errors[] = 'ไม่พบผู้ใช้งานที่ล็อกอิน (admin_id)';
+    }
+
 
     if (empty($errors)) {
         try {
@@ -157,6 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <?php include('./structure/head.php') ?>
     <title>สร้างข่าว</title>
@@ -173,123 +186,123 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-<div class="wrapper">
-    <?php include('./components/sidebar.php') ?>
-    <?php include('./components/navbar.php') ?>
+    <div class="wrapper">
+        <?php include('./components/sidebar.php') ?>
+        <?php include('./components/navbar.php') ?>
 
-    <div class="page-wrapper">
-        <div class="page-content-wrapper page-content-margin-padding">
-            <div class="page-content page-content-margin-padding">
+        <div class="page-wrapper">
+            <div class="page-content-wrapper page-content-margin-padding">
+                <div class="page-content page-content-margin-padding">
 
-                <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-                    <div class="breadcrumb-title pe-3">News</div>
-                    <div class="ps-3">
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0 p-0">
-                                <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a></li>
-                                <li class="breadcrumb-item"><a href="news_list.php">รายการข่าว</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">เพิ่มข่าว</li>
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-
-                <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            <?php foreach ($errors as $er): ?>
-                                <li><?= h($er) ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($success !== ''): ?>
-                    <div class="alert alert-success"><?= h($success) ?></div>
-                <?php endif; ?>
-
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title">
-                            <h4 class="mb-0">ฟอร์มสร้างข่าว</h4>
+                    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+                        <div class="breadcrumb-title pe-3">News</div>
+                        <div class="ps-3">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0 p-0">
+                                    <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a></li>
+                                    <li class="breadcrumb-item"><a href="news_list.php">รายการข่าว</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">เพิ่มข่าว</li>
+                                </ol>
+                            </nav>
                         </div>
-                        <hr/>
-
-                        <form method="post" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label class="form-label">หัวข้อข่าว <span class="text-danger">*</span></label>
-                                <input type="text" name="title" class="form-control" value="<?= h($title) ?>" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">รายละเอียด <span class="text-danger">*</span></label>
-                                <textarea name="detail" class="form-control" rows="8" required><?= h($detail) ?></textarea>
-                            </div>
-
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">วันที่ลงข่าว <span class="text-danger">*</span></label>
-                                    <input type="date" name="posted_date" class="form-control" value="<?= h($posted_date) ?>" required>
-                                </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="is_visible" id="is_visible" <?= $is_visible ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="is_visible">แสดงข่าว</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="mb-0">รูปข่าว</h5>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" id="addImageBtn">+ เพิ่มแถวรูป</button>
-                            </div>
-
-                            <div id="imageRows">
-                                <div class="image-row row g-2">
-                                    <div class="col-md-5">
-                                        <label class="form-label">ไฟล์รูป</label>
-                                        <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
-                                    </div>
-                                    <div class="col-md-5">
-                                        <label class="form-label">Alt text</label>
-                                        <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Sort</label>
-                                        <input type="number" name="image_sort[]" class="form-control" value="1" min="0">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-3 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">บันทึกข่าว</button>
-                                <a href="news_list.php" class="btn btn-light">ยกเลิก</a>
-                            </div>
-                        </form>
                     </div>
-                </div>
 
+                    <?php if (!empty($errors)): ?>
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                <?php foreach ($errors as $er): ?>
+                                    <li><?= h($er) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($success !== ''): ?>
+                        <div class="alert alert-success"><?= h($success) ?></div>
+                    <?php endif; ?>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title">
+                                <h4 class="mb-0">ฟอร์มสร้างข่าว</h4>
+                            </div>
+                            <hr />
+
+                            <form method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label class="form-label">หัวข้อข่าว <span class="text-danger">*</span></label>
+                                    <input type="text" name="title" class="form-control" value="<?= h($title) ?>" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">รายละเอียด <span class="text-danger">*</span></label>
+                                    <textarea name="detail" class="form-control" rows="8" required><?= h($detail) ?></textarea>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">วันที่ลงข่าว <span class="text-danger">*</span></label>
+                                        <input type="date" name="posted_date" class="form-control" value="<?= h($posted_date) ?>" required>
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="is_visible" id="is_visible" <?= $is_visible ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="is_visible">แสดงข่าว</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">รูปข่าว</h5>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="addImageBtn">+ เพิ่มแถวรูป</button>
+                                </div>
+
+                                <div id="imageRows">
+                                    <div class="image-row row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label">ไฟล์รูป</label>
+                                            <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label">Alt text</label>
+                                            <input type="text" name="image_alt[]" class="form-control" placeholder="คำอธิบายรูป">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Sort</label>
+                                            <input type="number" name="image_sort[]" class="form-control" value="1" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">บันทึกข่าว</button>
+                                    <a href="news_list.php" class="btn btn-light">ยกเลิก</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="overlay toggle-btn-mobile"></div>
-<a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+    <div class="overlay toggle-btn-mobile"></div>
+    <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
 
-<?php include('./structure/script.php') ?>
+    <?php include('./structure/script.php') ?>
 
-<script>
-(function () {
-    const addBtn = document.getElementById('addImageBtn');
-    const box = document.getElementById('imageRows');
+    <script>
+        (function() {
+            const addBtn = document.getElementById('addImageBtn');
+            const box = document.getElementById('imageRows');
 
-    addBtn.addEventListener('click', function () {
-        const idx = box.querySelectorAll('.image-row').length + 1;
-        const row = document.createElement('div');
-        row.className = 'image-row row g-2';
-        row.innerHTML = `
+            addBtn.addEventListener('click', function() {
+                const idx = box.querySelectorAll('.image-row').length + 1;
+                const row = document.createElement('div');
+                row.className = 'image-row row g-2';
+                row.innerHTML = `
             <div class="col-md-5">
                 <label class="form-label">ไฟล์รูป</label>
                 <input type="file" name="images[]" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif">
@@ -303,9 +316,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="number" name="image_sort[]" class="form-control" value="${idx}" min="0">
             </div>
         `;
-        box.appendChild(row);
-    });
-})();
-</script>
+                box.appendChild(row);
+            });
+        })();
+    </script>
 </body>
+
 </html>
