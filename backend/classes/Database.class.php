@@ -34,7 +34,7 @@
             $candidates = [];
             if ($primary !== '') $candidates[] = $primary;
             $candidates[] = 'thaifa_db';
-            $candidates[] = '127.0.0.1';
+            $candidates[] = '147.50.255.11';
             $candidates[] = 'localhost';
             return array_values(array_unique($candidates));
         }
