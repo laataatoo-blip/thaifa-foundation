@@ -20,6 +20,16 @@
                                     $last  = $_SESSION['StaffLogin']['Lastname'] ?? '';
                                     $user_name = trim($first . ' ' . $last);
                                     $user_id   = $_SESSION['StaffLogin']['StaffID'] ?? '';
+                                } elseif (isset($_SESSION['AdminLogin']) && is_array($_SESSION['AdminLogin'])) {
+                                    $fullName = trim((string)($_SESSION['AdminLogin']['FullName'] ?? ''));
+                                    $adminName = trim((string)($_SESSION['AdminLogin']['AdminName'] ?? ''));
+                                    $name = trim((string)($_SESSION['AdminLogin']['Name'] ?? ''));
+                                    $username = trim((string)($_SESSION['AdminLogin']['Username'] ?? ''));
+
+                                    $user_name = $fullName !== '' ? $fullName :
+                                        ($adminName !== '' ? $adminName :
+                                        ($name !== '' ? $name : $username));
+                                    $user_id   = $_SESSION['AdminLogin']['AdminID'] ?? '';
                                 } elseif (isset($_SESSION['ParentLogin']) && is_array($_SESSION['ParentLogin'])) {
                                     $first = $_SESSION['ParentLogin']['ParentName'] ?? '';
                                     $last  = $_SESSION['ParentLogin']['ParentSurname'] ?? '';
@@ -39,9 +49,18 @@
                             <?php
                             $img_path = "./assets/images/icons/user.png";
                             $staffPic = $_SESSION['StaffLogin']['StaffPic'] ?? '';
+                            $adminPic = $_SESSION['AdminLogin']['ProfilePic'] ?? '';
 
-                            if ($staffPic !== '' && file_exists("../{$staffPic}")) {
-                                $img_path = "../{$staffPic}";
+                            if ($staffPic !== '') {
+                                $staffPicRel = ltrim((string)$staffPic, '/');
+                                if ($staffPicRel !== '' && is_file(__DIR__ . '/../' . $staffPicRel)) {
+                                    $img_path = "./" . $staffPicRel;
+                                }
+                            } elseif ($adminPic !== '') {
+                                $adminPicRel = ltrim((string)$adminPic, '/');
+                                if ($adminPicRel !== '' && is_file(__DIR__ . '/../' . $adminPicRel)) {
+                                    $img_path = "./" . $adminPicRel;
+                                }
                             }
                             ?>
                             <img src="<?php echo htmlspecialchars($img_path, ENT_QUOTES, 'UTF-8'); ?>" class="user-img" alt="user avatar">
@@ -49,7 +68,7 @@
                     </span>
 
                     <div class="dropdown-menu p-0 m-0">
-                        <?php if (isset($_SESSION['StaffLogin'])) : ?>
+                        <?php if (isset($_SESSION['StaffLogin']) || isset($_SESSION['AdminLogin'])) : ?>
                             <a class="dropdown-item" href="profile.php">Profile</a>
                         <?php endif; ?>
                         <a class="btn btn-sm btn-danger w-100" href="./logout.php">
@@ -62,4 +81,3 @@
     </nav>
 </header>
 <!--end header-->
-```

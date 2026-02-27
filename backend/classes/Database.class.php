@@ -11,7 +11,7 @@
     error_reporting(E_ALL);
     class Database
     {
-        private $host = "localhost";
+        private $host = "thaifa_db";
         private $uname = "thaifa_fd";   
         private $passwd = "*T52Ki6J*jsylalm";
         private $dbname = "thaifa_fd";
@@ -19,7 +19,7 @@
         public $dbConn;
         public function __construct()
         {
-            $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8";
+            $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4";
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -34,7 +34,7 @@
         }
         public function db()
         {
-            $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8";
+            $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4";
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

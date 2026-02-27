@@ -12,10 +12,10 @@
 	</div>
 
 	<ul class="metismenu" id="menu">
-		<?php if (isset($_SESSION['StaffLogin'])) : ?>
+			<?php if (isset($_SESSION['StaffLogin']) || isset($_SESSION['AdminLogin'])) : ?>
 
-			<li>
-				<a href="./index.php">
+				<li>
+					<a href="./index.php">
 					<div class="parent-icon icon-color-1"><i class="bx bx-home-alt"></i></div>
 					<div class="menu-title">Home</div>
 				</a>
@@ -37,6 +37,6 @@
 				</a>
 			</li>
 
-		<?php endif; ?>
+			<?php endif; ?>
 	</ul>
 </div>

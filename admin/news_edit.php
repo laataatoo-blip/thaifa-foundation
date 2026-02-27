@@ -8,7 +8,8 @@ $MM_authorizedUsers = "Admin";
 $MM_donotCheckaccess = "false";
 include('./components/funcCheckSession.php');
 
-include('./backend/classes/DatabaseManagement.class.php');
+include(__DIR__ . '/../backend/classes/DatabaseManagement.class.php');
+include_once(__DIR__ . '/../backend/classes/NewsContentAnalyzer.class.php');
 $DB = new DatabaseManagement();
 
 /**
@@ -17,6 +18,162 @@ $DB = new DatabaseManagement();
 function h($str)
 {
     return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8');
+}
+
+function parseThaiDateToYmd($text)
+{
+    $text = trim((string)$text);
+    if ($text === '') return null;
+
+    $months = [
+        'ม.ค.' => 1, 'มกราคม' => 1,
+        'ก.พ.' => 2, 'กุมภาพันธ์' => 2,
+        'มี.ค.' => 3, 'มีนาคม' => 3,
+        'เม.ย.' => 4, 'เมษายน' => 4,
+        'พ.ค.' => 5, 'พฤษภาคม' => 5,
+        'มิ.ย.' => 6, 'มิถุนายน' => 6,
+        'ก.ค.' => 7, 'กรกฎาคม' => 7,
+        'ส.ค.' => 8, 'สิงหาคม' => 8,
+        'ก.ย.' => 9, 'กันยายน' => 9,
+        'ต.ค.' => 10, 'ตุลาคม' => 10,
+        'พ.ย.' => 11, 'พฤศจิกายน' => 11,
+        'ธ.ค.' => 12, 'ธันวาคม' => 12,
+    ];
+
+    if (preg_match('/(\d{1,2})\s+([^\s]+)\s+(\d{4})/u', $text, $m)) {
+        $d = (int)$m[1];
+        $mTxt = trim($m[2]);
+        $y = (int)$m[3];
+        if (isset($months[$mTxt])) {
+            $mm = (int)$months[$mTxt];
+            if ($y > 2400) $y -= 543;
+            if (checkdate($mm, $d, $y)) {
+                return sprintf('%04d-%02d-%02d', $y, $mm, $d);
+            }
+        }
+    }
+
+    return null;
+}
+
+function normalizeNewsTitle($title, $detail = '')
+{
+    return NewsContentAnalyzer::normalizeNewsTitle($title, $detail);
+}
+
+function normalizeNewsCategory($category)
+{
+    return NewsContentAnalyzer::normalizeNewsCategory($category);
+}
+
+function fetchHtmlByUrl($url)
+{
+    $ctx = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)\r\n",
+            'timeout' => 25
+        ]
+    ]);
+    $html = @file_get_contents($url, false, $ctx);
+    return is_string($html) ? $html : '';
+}
+
+function normalizeImageUrl($url)
+{
+    $url = trim((string)$url);
+    if ($url === '') return '';
+
+    $url = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $url = str_replace(['\\/', '\\u002F', '\\u002f'], '/', $url);
+    $url = str_replace(['\\u0025', '\\u0025'], '%', $url);
+    $url = str_replace('&amp;', '&', $url);
+    $url = preg_replace('/\\\\u00([0-9a-fA-F]{2})/', '%$1', $url);
+    $url = stripcslashes($url);
+
+    if (strpos($url, 'http://') !== 0 && strpos($url, 'https://') !== 0) {
+        return '';
+    }
+
+    return $url;
+}
+
+function extractFacebookImageUrls($html)
+{
+    $html = (string)$html;
+    if (trim($html) === '') return [];
+
+    $patterns = [
+        '/property="og:image"\s+content="([^"]+)"/i',
+        '/property="og:image:url"\s+content="([^"]+)"/i',
+        '/"image"\s*:\s*\{"uri":"([^"]+)"/i',
+        '/"image"\s*:\s*"([^"]*scontent[^"]+)"/i',
+        '/"src"\s*:\s*"([^"]*scontent[^"]+)"/i',
+        '/(https:\\\/\\\/scontent[^"\'\s<]+)/i',
+        '/(https:\/\/scontent[^"\'\s<]+)/i'
+    ];
+
+    $images = [];
+    $seen = [];
+    foreach ($patterns as $pattern) {
+        if (!preg_match_all($pattern, $html, $m)) continue;
+        foreach (($m[1] ?? []) as $raw) {
+            $url = normalizeImageUrl($raw);
+            if ($url === '' || isset($seen[$url])) continue;
+            $seen[$url] = true;
+            $images[] = $url;
+        }
+    }
+
+    return array_slice($images, 0, 20);
+}
+
+function fetchFacebookPreview($url)
+{
+    $url = trim((string)$url);
+    if ($url === '' || !preg_match('#^https?://#i', $url)) {
+        throw new Exception('ลิงก์ไม่ถูกต้อง');
+    }
+
+    $html = fetchHtmlByUrl($url);
+    if ($html === '') {
+        throw new Exception('ไม่สามารถดึงข้อมูลจากลิงก์นี้ได้');
+    }
+
+    $pick = function ($prop) use ($html) {
+        if (preg_match('/property="' . preg_quote($prop, '/') . '"\s+content="([^"]*)"/i', $html, $m)) {
+            return html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        return '';
+    };
+
+    $title = trim((string)$pick('og:title'));
+    $desc = trim((string)$pick('og:description'));
+    $canonicalUrl = trim((string)$pick('og:url'));
+    $images = extractFacebookImageUrls($html);
+
+    $mbasicUrl = preg_replace('#^https?://(www\.)?facebook\.com/#i', 'https://mbasic.facebook.com/', $url);
+    if (is_string($mbasicUrl) && $mbasicUrl !== '' && $mbasicUrl !== $url) {
+        $mbasicHtml = fetchHtmlByUrl($mbasicUrl);
+        if ($mbasicHtml !== '') {
+            $extra = extractFacebookImageUrls($mbasicHtml);
+            if (!empty($extra)) {
+                $images = array_values(array_unique(array_merge($images, $extra)));
+                $images = array_slice($images, 0, 20);
+            }
+        }
+    }
+
+    $line = $desc !== '' ? trim((string)preg_split('/\R/u', $desc)[0]) : '';
+    $ymd = parseThaiDateToYmd($line);
+
+    return [
+        'title' => $title,
+        'description' => $desc,
+        'source_url' => $canonicalUrl !== '' ? $canonicalUrl : $url,
+        'posted_date' => $ymd ?: date('Y-m-d'),
+        'images' => $images
+    ];
 }
 
 /**
@@ -70,6 +227,9 @@ $title = (string)($news['title'] ?? '');
 $detail = (string)($news['detail'] ?? '');
 $posted_date = (string)($news['posted_date'] ?? date('Y-m-d'));
 $is_visible = (int)($news['is_visible'] ?? 1);
+$category = normalizeNewsCategory($news['category'] ?? 'ทั่วไป');
+$fb_source_url = trim((string)($news['source_post_url'] ?? ''));
+$external_images = [];
 
 // โหลดรูปเดิม
 $images = $DB->selectAll("
@@ -80,11 +240,36 @@ $images = $DB->selectAll("
 ", [':news_id' => $news_id]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title'] ?? '');
-    $detail = trim($_POST['detail'] ?? '');
-    $posted_date = trim($_POST['posted_date'] ?? date('Y-m-d'));
+    $action = trim((string)($_POST['action'] ?? 'update_news'));
+    $title = trim((string)($_POST['title'] ?? ''));
+    $detail = trim((string)($_POST['detail'] ?? ''));
+    $posted_date = trim((string)($_POST['posted_date'] ?? date('Y-m-d')));
     $is_visible = isset($_POST['is_visible']) ? 1 : 0;
+    $category = normalizeNewsCategory($_POST['category'] ?? $category);
+    $fb_source_url = trim((string)($_POST['fb_source_url'] ?? ''));
+    $external_images = array_values(array_filter($_POST['external_image_url'] ?? [], function ($v) {
+        return trim((string)$v) !== '';
+    }));
 
+    if ($action === 'fetch_fb_preview') {
+        try {
+            $preview = fetchFacebookPreview($fb_source_url);
+            $title = normalizeNewsTitle($preview['title'] !== '' ? $preview['title'] : $title, $preview['description']);
+            $detail = NewsContentAnalyzer::simplifyDetail($preview['description']);
+            if ($preview['source_url'] !== '') {
+                $detail .= ($detail !== '' ? "\n\n" : '') . "ที่มาโพสต์ Facebook:\n" . $preview['source_url'];
+            }
+            $posted_date = $preview['posted_date'] ?: $posted_date;
+            $external_images = $preview['images'];
+            $success = 'ดึงข้อมูลล่าสุดจาก Facebook แล้ว กรุณาตรวจสอบและกดบันทึกการแก้ไข';
+        } catch (Throwable $e) {
+            $errors[] = 'ดึงข้อมูลจาก Facebook ไม่สำเร็จ: ' . $e->getMessage();
+        }
+    } else {
+
+    $title = normalizeNewsTitle($title, $detail);
+    $detail = NewsContentAnalyzer::simplifyDetail($detail);
+    $category = NewsContentAnalyzer::detectCategory($title, $detail, $fb_source_url, $category);
     if ($title === '') $errors[] = 'กรุณากรอกหัวข้อข่าว';
     if ($detail === '') $errors[] = 'กรุณากรอกรายละเอียด';
     if ($posted_date === '') $errors[] = 'กรุณาเลือกวันที่ลงข่าว';
@@ -95,12 +280,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titleEsc = dbEscape($DB, $title);
             $detailEsc = dbEscape($DB, $detail);
             $dateEsc = dbEscape($DB, $posted_date);
+            $categoryEsc = dbEscape($DB, $category);
+            $sourceSql = ($fb_source_url === '') ? "NULL" : ("'" . dbEscape($DB, $fb_source_url) . "'");
 
             $sqlNews = "
                 UPDATE news
                 SET title = '{$titleEsc}',
                     detail = '{$detailEsc}',
                     posted_date = '{$dateEsc}',
+                    category = '{$categoryEsc}',
+                    source_post_url = {$sourceSql},
                     is_visible = {$is_visible}
                 WHERE id = {$news_id}
                 LIMIT 1
@@ -111,6 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existingAlt = $_POST['existing_alt'] ?? [];
             $existingSort = $_POST['existing_sort'] ?? [];
             $deleteImage = $_POST['delete_image'] ?? [];
+            $sortStart = 1;
 
             if (!empty($images)) {
                 foreach ($images as $img) {
@@ -134,6 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $sort = (int)($existingSort[$imgId] ?? 0);
                     $altSql = ($alt === '') ? "NULL" : ("'" . dbEscape($DB, $alt) . "'");
                     $sortSql = max(0, $sort);
+                    if ($sortSql >= $sortStart) $sortStart = $sortSql + 1;
 
                     dbExec($DB, "
                         UPDATE news_images
@@ -180,7 +371,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $relEsc = dbEscape($DB, $relUrl);
                     $altSql = ($alt_text === '') ? "NULL" : ("'" . dbEscape($DB, $alt_text) . "'");
                     $sortSql = max(0, $sort_order);
+                    if ($sortSql >= $sortStart) $sortStart = $sortSql + 1;
 
+                    dbExec($DB, "
+                        INSERT INTO news_images (news_id, image_url, alt_text, sort_order)
+                        VALUES ({$news_id}, '{$relEsc}', {$altSql}, {$sortSql})
+                    ");
+                }
+            }
+
+            // 4) เพิ่มรูปจากลิงก์ Facebook ที่ดึงมา
+            if (!empty($external_images)) {
+                foreach ($external_images as $i => $extUrl) {
+                    $extUrl = trim((string)$extUrl);
+                    if ($extUrl === '' || !preg_match('#^https?://#i', $extUrl)) continue;
+                    $relEsc = dbEscape($DB, $extUrl);
+                    $altSql = "'ภาพประกอบข่าวจาก Facebook'";
+                    $sortSql = $sortStart + $i;
                     dbExec($DB, "
                         INSERT INTO news_images (news_id, image_url, alt_text, sort_order)
                         VALUES ({$news_id}, '{$relEsc}', {$altSql}, {$sortSql})
@@ -204,9 +411,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $detail = (string)($news['detail'] ?? '');
             $posted_date = (string)($news['posted_date'] ?? date('Y-m-d'));
             $is_visible = (int)($news['is_visible'] ?? 1);
+            $category = normalizeNewsCategory($news['category'] ?? $category);
+            $fb_source_url = trim((string)($news['source_post_url'] ?? $fb_source_url));
+            $external_images = [];
         } catch (Throwable $e) {
             $errors[] = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
         }
+    }
     }
 }
 ?>
@@ -275,6 +486,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <form method="post" enctype="multipart/form-data">
                             <input type="hidden" name="id" value="<?= (int)$news_id ?>">
+                            <?php if (!empty($external_images)): ?>
+                                <?php foreach ($external_images as $imgUrl): ?>
+                                    <input type="hidden" name="external_image_url[]" value="<?= h($imgUrl) ?>">
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+
+                            <div class="row g-2 align-items-end mb-3">
+                                <div class="col-md-9">
+                                    <label class="form-label">ลิงก์โพสต์ Facebook (ดึงข้อมูลล่าสุด)</label>
+                                    <input type="url" name="fb_source_url" class="form-control" placeholder="https://www.facebook.com/share/p/..." value="<?= h($fb_source_url) ?>">
+                                </div>
+                                <div class="col-md-3 d-grid">
+                                    <button type="submit" name="action" value="fetch_fb_preview" class="btn btn-outline-primary">ดึงข้อมูลจาก Facebook</button>
+                                </div>
+                            </div>
 
                             <div class="mb-3">
                                 <label class="form-label">หัวข้อข่าว <span class="text-danger">*</span></label>
@@ -291,6 +517,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label class="form-label">วันที่ลงข่าว <span class="text-danger">*</span></label>
                                     <input type="date" name="posted_date" class="form-control" value="<?= h($posted_date) ?>" required>
                                 </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">หมวดหมู่ข่าว</label>
+                                    <input type="text" name="category" class="form-control" value="<?= h($category) ?>" list="newsCategoryList" placeholder="เช่น กิจกรรม">
+                                </div>
                                 <div class="col-md-4 d-flex align-items-end">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="is_visible" id="is_visible" <?= $is_visible ? 'checked' : '' ?>>
@@ -298,6 +528,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                 </div>
                             </div>
+
+                            <hr>
+                            <?php if (!empty($external_images)): ?>
+                                <div class="mb-3">
+                                    <label class="form-label">รูปจากลิงก์ Facebook ที่จะเพิ่ม (<?= count($external_images) ?> รูป)</label>
+                                    <div class="row g-2">
+                                        <?php foreach ($external_images as $imgUrl): ?>
+                                            <div class="col-md-3 col-6">
+                                                <a href="<?= h($imgUrl) ?>" target="_blank" class="d-block border rounded overflow-hidden">
+                                                    <img src="<?= h($imgUrl) ?>" alt="fb-image" class="img-fluid" style="height:120px;width:100%;object-fit:cover;">
+                                                </a>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="text-muted small mt-1">รูปชุดนี้จะถูกเพิ่มเมื่อกด "บันทึกการแก้ไข"</div>
+                                </div>
+                            <?php endif; ?>
 
                             <hr>
                             <h5 class="mb-3">รูปเดิม</h5>
@@ -355,10 +602,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <div class="mt-3 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+                                <button type="submit" name="action" value="update_news" class="btn btn-primary">บันทึกการแก้ไข</button>
                                 <a href="news_list.php" class="btn btn-light">ยกเลิก</a>
                             </div>
                         </form>
+                        <datalist id="newsCategoryList">
+                            <option value="ทั่วไป">
+                            <option value="กิจกรรม">
+                            <option value="ประชาสัมพันธ์">
+                            <option value="อบรม/สัมมนา">
+                            <option value="โครงการ">
+                            <option value="Facebook">
+                        </datalist>
                     </div>
                 </div>
 
@@ -395,6 +650,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 (function() {
     const addBtn = document.getElementById('addImageBtn');
     const box = document.getElementById('imageRows');
+    if (!addBtn || !box) return;
 
     addBtn.addEventListener('click', function() {
         const idx = box.querySelectorAll('.image-row').length + 1;

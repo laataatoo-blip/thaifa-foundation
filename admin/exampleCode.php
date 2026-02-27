@@ -8,8 +8,8 @@ $MM_authorizedUsers = "1,2,3,4";
 $MM_donotCheckaccess = "false";
 include('./components/funcCheckSession.php');
 
-include('./backend/classes/DatabaseManagement.class.php');
-include('./backend/classes/Program.class.php');
+include(__DIR__ . '/../backend/classes/DatabaseManagement.class.php');
+include(__DIR__ . '/../backend/classes/Program.class.php');
 $DB = new DatabaseManagement();
 $Program = new Program();
 
@@ -27,8 +27,8 @@ foreach ($genderData as $g) {
     if ($g['GenderID'] == 2) $femaleCount = $g['cnt'];
 }
 
-// 3. Total Staff
-$totalStaff = $DB->selectOne("SELECT COUNT(*) as total FROM staff WHERE isActive='Y'")['total'] ?? 0;
+// 3. Total Admin
+$totalAdmin = $DB->selectOne("SELECT COUNT(*) as total FROM Admin WHERE isActive='Y'")['total'] ?? 0;
 
 // 4. Today's Attendance
 $today = date('Y-m-d');
@@ -166,12 +166,12 @@ function formatThaiTime($datetime)
                             </div>
                         </div>
 
-                        <!-- Total Staff (White) -->
+                        <!-- Total Admin (White) -->
                         <div class="col-md-6 col-lg-3">
                             <div class="metric-card">
                                 <div class="metric-icon-box info"><i class='bx bxs-user-badge'></i></div>
                                 <div class="metric-title">บุคลากรทั้งหมด</div>
-                                <div class="metric-value"><?= number_format($totalStaff) ?> <span class="fs-6 text-muted fw-normal">คน</span></div>
+                                <div class="metric-value"><?= number_format($totalAdmin) ?> <span class="fs-6 text-muted fw-normal">คน</span></div>
                             </div>
                         </div>
 
@@ -180,7 +180,7 @@ function formatThaiTime($datetime)
                             <div class="metric-card">
                                 <div class="metric-icon-box purple"><i class='bx bx-group'></i></div>
                                 <div class="metric-title">อัตราส่วน ครู:นักเรียน</div>
-                                <div class="metric-value">1:<?= $totalStaff > 0 ? round($totalStudents / $totalStaff) : 0 ?></div>
+                                <div class="metric-value">1:<?= $totalAdmin > 0 ? round($totalStudents / $totalAdmin) : 0 ?></div>
                             </div>
                         </div>
                     </div>

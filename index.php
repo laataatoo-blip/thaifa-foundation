@@ -1,3 +1,81 @@
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+date_default_timezone_set('Asia/Bangkok');
+
+include(__DIR__ . '/backend/classes/DatabaseManagement.class.php');
+$DB = new DatabaseManagement();
+
+function h($str)
+{
+    return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8');
+}
+
+function newsImageUrl($path)
+{
+    $path = trim((string)$path);
+    if ($path === '') {
+        return 'assets/images/Logo.png';
+    }
+    if (preg_match('#^https?://#i', $path)) {
+        return $path;
+    }
+    $clean = ltrim($path, '/');
+    if (strpos($clean, 'admin/') === 0) {
+        return $clean;
+    }
+    if (strpos($clean, 'uploads/') === 0) {
+        return 'admin/' . $clean;
+    }
+    return $clean;
+}
+
+function thaiDate($dateStr)
+{
+    $ts = strtotime((string)$dateStr);
+    if (!$ts) {
+        return '-';
+    }
+    $thaiMonths = [1 => 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+    $d = (int)date('j', $ts);
+    $m = (int)date('n', $ts);
+    $y = (int)date('Y', $ts) + 543;
+    return $d . ' ' . ($thaiMonths[$m] ?? '') . ' ' . $y;
+}
+
+function snippetText($text, $len = 140)
+{
+    $txt = trim(strip_tags((string)$text));
+    if ($txt === '') {
+        return '';
+    }
+    if (mb_strlen($txt, 'UTF-8') <= $len) {
+        return $txt;
+    }
+    return mb_substr($txt, 0, $len, 'UTF-8') . '...';
+}
+
+$latestNews = $DB->selectAll("
+    SELECT
+        n.id,
+        n.title,
+        n.detail,
+        n.posted_date,
+        n.source_published_at,
+        (
+            SELECT ni.image_url
+            FROM news_images ni
+            WHERE ni.news_id = n.id
+            ORDER BY ni.sort_order ASC, ni.id ASC
+            LIMIT 1
+        ) AS cover_image
+    FROM news n
+    WHERE n.is_visible = 1
+    ORDER BY COALESCE(n.source_published_at, CONCAT(n.posted_date, ' 00:00:00')) DESC, n.id DESC
+");
+$initialNewsVisible = 3;
+?>
 <!DOCTYPE html>
 <html lang="th">
 
@@ -355,98 +433,52 @@
                 </div>
 
                 <!-- News Grid -->
-                <div class="grid md:grid-cols-3 gap-6">
-                    <!-- News Card 1 -->
-                    <div
-                        class="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer">
-                        <div class="relative h-56 overflow-hidden">
-                            <img src="https://via.placeholder.com/400x224/233882/FFFFFF?text=News+1"
-                                alt="ร่วมเป็นเจ้าภาพสวดอภิธรรมคุณแม่ดวงพร"
-                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                            <!-- Figma: figma:asset/e66a77b70ca102b90c3afee6bb0be8aa64617212.png -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-4 left-4 flex items-center gap-2 text-white text-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span>1 พฤศจิกายน 2568</span>
-                            </div>
+                <div id="newsGrid" class="grid md:grid-cols-3 gap-6">
+                    <?php if (!empty($latestNews)): ?>
+                        <?php foreach ($latestNews as $idx => $item): ?>
+                            <a href="news-detail.php?id=<?= (int)$item['id'] ?>"
+                               class="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer block news-card <?= $idx >= $initialNewsVisible ? 'hidden' : '' ?>">
+                                <div class="relative h-52 overflow-hidden">
+                                    <img src="<?= h(newsImageUrl($item['cover_image'] ?? '')) ?>"
+                                         alt="<?= h($item['title'] ?? 'ข่าวสาร') ?>"
+                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                    <div class="absolute bottom-4 left-4 flex items-center gap-2 text-white text-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span><?= h(thaiDate($item['posted_date'] ?? '')) ?></span>
+                                    </div>
+                                </div>
+                                <div class="p-5">
+                                    <h3 class="text-primary text-xl line-clamp-2 mb-3"><?= h($item['title'] ?? '') ?></h3>
+                                    <p class="text-foreground/70 text-sm leading-relaxed line-clamp-3 mb-3">
+                                        <?= h(snippetText($item['detail'] ?? '', 120)) ?>
+                                    </p>
+                                    <span class="text-accent text-sm hover:underline">อ่านต่อ →</span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="md:col-span-3 rounded-2xl border border-border bg-white p-10 text-center text-foreground/70">
+                            ยังไม่มีข่าวที่เผยแพร่ในขณะนี้
                         </div>
-                        <div class="p-6">
-                            <h3 class="text-primary mb-3 text-xl line-clamp-2">
-                                ร่วมเป็นเจ้าภาพสวดอภิธรรมคุณแม่ดวงพร
-                            </h3>
-                            <p class="text-foreground/70 text-sm leading-relaxed line-clamp-3 mb-4">
-                                มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน ร่วมเป็นเจ้าภาพสวดอภิธรรมคุณแม่ดวงพร
-                                แวกประยูร มารดาของคุณปาน ธนพร แวกประยูร
-                            </p>
-                            <span class="text-accent text-sm hover:underline">
-                                อ่านต่อ →
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- News Card 2 -->
-                    <div
-                        class="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer">
-                        <div class="relative h-56 overflow-hidden">
-                            <img src="https://via.placeholder.com/400x224/233882/FFFFFF?text=News+2"
-                                alt="บูธในงานเครือชุมทอง AIA"
-                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-4 left-4 flex items-center gap-2 text-white text-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span>4 ตุลาคม 2568</span>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-primary mb-3 text-xl line-clamp-2">
-                                บูธในงานเครือชุมทอง AIA
-                            </h3>
-                            <p class="text-foreground/70 text-sm leading-relaxed line-clamp-3 mb-4">
-                                มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน นำหนังสือและสินค้าที่ระลึก เช่น หมอนผ้าห่ม
-                                มาร่วมจำหน่ายที่บูธในงานของเครือชุมทอง AIA
-                            </p>
-                            <span class="text-accent text-sm hover:underline">
-                                อ่านต่อ →
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- News Card 3 -->
-                    <div
-                        class="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer">
-                        <div class="relative h-56 overflow-hidden">
-                            <img src="https://via.placeholder.com/400x224/233882/FFFFFF?text=News+3"
-                                alt="งานประจำปี มหรสพครบวงจร ครบรอบ 25 ปี"
-                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-4 left-4 flex items-center gap-2 text-white text-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span>11 กันยายน 2568</span>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-primary mb-3 text-xl line-clamp-2">
-                                งานประจำปี มหรสพครบวงจร ครบรอบ 25 ปี
-                            </h3>
-                            <p class="text-foreground/70 text-sm leading-relaxed line-clamp-3 mb-4">
-                                มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน จัดงานประจำปีเนื่องในโอกาสก้าวสู่ปีที่ 25
-                                ภายใต้คอนเซ็ปต์ "มหรสพครบวงจร – หนึ่งความรักจากฉัน หมื่นพันความฝันของเธอ"
-                            </p>
-                            <span class="text-accent text-sm hover:underline">
-                                อ่านต่อ →
-                            </span>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
+
+                <?php if (count($latestNews) > $initialNewsVisible): ?>
+                <div class="mt-8 text-center">
+                    <button id="showAllNewsBtn" type="button" onclick="toggleAllNews(true)"
+                            class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-full px-6 py-3 transition-all">
+                        ดูข่าวทั้งหมด
+                    </button>
+                    <button id="collapseNewsBtn" type="button" onclick="toggleAllNews(false)"
+                            class="hidden inline-flex items-center gap-2 border border-primary text-primary hover:bg-primary/10 rounded-full px-6 py-3 transition-all">
+                        ย่อข่าวทั้งหมด
+                    </button>
+                </div>
+                <?php endif; ?>
             </div>
         </section>
     </main>
@@ -455,10 +487,11 @@
     <footer class="bg-primary text-white pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                
                 <!-- About -->
                 <div>
                     <div class="mb-6">
-                        <img src="assets/images/Logo.png" alt="THAIFA Logo"
+                        <img src="assets/images/Blue logo.png" alt="THAIFA Logo"
                             class="h-16 w-auto brightness-0 invert" />
                     </div>
                     <p class="text-white/80 text-sm leading-relaxed mb-4">
@@ -704,28 +737,36 @@
     document.body.style.overflow = 'auto';
   }
 
+  function toggleAllNews(showAll) {
+    const cards = document.querySelectorAll('#newsGrid .news-card');
+    if (!cards.length) return;
+
+    cards.forEach((card, index) => {
+      if (showAll || index < <?= (int)$initialNewsVisible ?>) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+
+    const showBtn = document.getElementById('showAllNewsBtn');
+    const collapseBtn = document.getElementById('collapseNewsBtn');
+    if (showBtn && collapseBtn) {
+      if (showAll) {
+        showBtn.classList.add('hidden');
+        collapseBtn.classList.remove('hidden');
+      } else {
+        collapseBtn.classList.add('hidden');
+        showBtn.classList.remove('hidden');
+        document.getElementById('news')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeContactModal();
   });
 </script>
-
-
-
-
-        function toggleFloatingContact() {
-            document.getElementById('contactModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeContactModal() {
-            document.getElementById('contactModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeContactModal();
-        });
-    </script>
 
 </body>
 

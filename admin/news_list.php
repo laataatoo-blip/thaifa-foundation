@@ -8,7 +8,8 @@ $MM_authorizedUsers = "Admin";
 $MM_donotCheckaccess = "false";
 include('./components/funcCheckSession.php');
 
-include('./backend/classes/DatabaseManagement.class.php');
+include(__DIR__ . '/../backend/classes/DatabaseManagement.class.php');
+include_once(__DIR__ . '/../backend/classes/NewsContentAnalyzer.class.php');
 $DB = new DatabaseManagement();
 
 /**
@@ -46,6 +47,10 @@ function snippet($text, $len = 120) {
 
 $errors = [];
 $success = '';
+$syncFlash = $_SESSION['sync_flash'] ?? null;
+unset($_SESSION['sync_flash']);
+$isFacebookSyncReady = trim((string)(getenv('FB_PAGE_ID') ?: '')) !== ''
+    && trim((string)(getenv('FB_PAGE_ACCESS_TOKEN') ?: '')) !== '';
 
 // ===== Delete action =====
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_news') {
@@ -95,7 +100,9 @@ $newsRows = $DB->selectAll("
         n.id,
         n.title,
         n.detail,
+        n.category,
         n.posted_date,
+        n.source_published_at,
         n.admin_id,
         n.is_visible,
         n.created_at,
@@ -111,8 +118,16 @@ $newsRows = $DB->selectAll("
           WHERE ni2.news_id = n.id
         ) AS image_count
     FROM news n
-    ORDER BY n.posted_date DESC, n.id DESC
+    ORDER BY COALESCE(n.source_published_at, CONCAT(n.posted_date, ' 00:00:00')) DESC, n.id DESC
 ");
+
+$categoryOptions = [];
+foreach ($newsRows as $r) {
+    $cat = NewsContentAnalyzer::normalizeNewsCategory($r['category'] ?? '');
+    $categoryOptions[$cat] = true;
+}
+$categoryOptions = array_keys($categoryOptions);
+sort($categoryOptions, SORT_NATURAL | SORT_FLAG_CASE);
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -125,6 +140,32 @@ $newsRows = $DB->selectAll("
     <title>จัดการข่าว</title>
 
     <style>
+        .news-table-wrap {
+            width: 100%;
+            overflow: hidden;
+        }
+        #newsTable {
+            width: 100% !important;
+            table-layout: fixed;
+            margin-bottom: 0 !important;
+        }
+        #newsTable th,
+        #newsTable td {
+            vertical-align: top;
+        }
+        #newsTable td:not(.col-news) {
+            white-space: nowrap;
+        }
+        #newsTable .col-id { width: 48px; text-align: center; }
+        #newsTable .col-news { width: 45%; min-width: 420px; }
+        #newsTable .col-category { width: 110px; text-align: center; }
+        #newsTable .col-date { width: 120px; }
+        #newsTable .col-status { width: 72px; text-align: center; }
+        #newsTable .col-imgcount { width: 46px; text-align: center; }
+        #newsTable .col-admin { width: 56px; text-align: center; }
+        #newsTable .col-updated { width: 138px; }
+        #newsTable .col-action { width: 158px; }
+
         .news-thumb {
             width: 72px;
             height: 48px;
@@ -134,13 +175,59 @@ $newsRows = $DB->selectAll("
             background: #f3f4f6;
         }
         .title-wrap {
-            min-width: 260px;
+            min-width: 0;
+            width: 100%;
+        }
+        .news-headline-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(220px, 36%);
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .news-title {
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .muted-snippet {
             font-size: 12px;
             color: #6b7280;
-            margin-top: 4px;
             line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .category-badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: .2rem .55rem;
+            background: #eaf4ff;
+            color: #1d4f91;
+            font-size: 12px;
+            font-weight: 600;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        @media (max-width: 1200px) {
+            .news-headline-row {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+        }
+        .action-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .action-group .btn {
+            min-width: 46px;
+            padding-left: .45rem;
+            padding-right: .45rem;
         }
     </style>
 </head>
@@ -166,6 +253,9 @@ $newsRows = $DB->selectAll("
                     </div>
 
                     <div class="ms-auto">
+                        <?php if ($isFacebookSyncReady): ?>
+                            <a href="news_sync.php" class="btn btn-outline-primary btn-sm me-2">ซิงก์จาก Facebook</a>
+                        <?php endif; ?>
                         <a href="news_create.php" class="btn btn-primary btn-sm">เพิ่มข่าว</a>
                     </div>
                 </div>
@@ -180,6 +270,12 @@ $newsRows = $DB->selectAll("
                     </div>
                 <?php endif; ?>
 
+                <?php if ($isFacebookSyncReady && is_array($syncFlash) && !empty($syncFlash['message'])): ?>
+                    <div class="alert alert-<?= ($syncFlash['type'] ?? '') === 'success' ? 'success' : 'warning' ?>">
+                        <?= h($syncFlash['message']) ?>
+                    </div>
+                <?php endif; ?>
+
                 <div class="card">
                     <div class="card-body">
                         <div class="card-title">
@@ -187,18 +283,31 @@ $newsRows = $DB->selectAll("
                         </div>
                         <hr/>
 
-                        <div class="table-responsive">
-                            <table id="newsTable" class="table table-striped table-bordered" style="width:100%">
+                        <div class="d-flex justify-content-end mb-2">
+                            <div style="min-width:220px;">
+                                <label for="categoryFilter" class="form-label mb-1">หมวดหมู่</label>
+                                <select id="categoryFilter" class="form-select form-select-sm">
+                                    <option value="">ทั้งหมด</option>
+                                    <?php foreach ($categoryOptions as $cat): ?>
+                                        <option value="<?= h($cat) ?>"><?= h($cat) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="news-table-wrap">
+                            <table id="newsTable" class="table table-striped table-bordered table-sm">
                                 <thead>
                                 <tr>
-                                    <th style="width:70px;">ID</th>
-                                    <th>ข่าว</th>
-                                    <th style="width:140px;">วันที่ลงข่าว</th>
-                                    <th style="width:110px;">สถานะ</th>
-                                    <th style="width:90px;">รูป</th>
-                                    <th style="width:90px;">Admin</th>
-                                    <th style="width:170px;">อัปเดตล่าสุด</th>
-                                    <th style="width:230px;">จัดการ</th>
+                                    <th class="col-id">ID</th>
+                                    <th class="col-news">ข่าว</th>
+                                    <th class="col-category">หมวดหมู่</th>
+                                    <th class="col-date">วันที่ลงข่าว</th>
+                                    <th class="col-status">สถานะ</th>
+                                    <th class="col-imgcount">รูป</th>
+                                    <th class="col-admin">Admin</th>
+                                    <th class="col-updated">อัปเดตล่าสุด</th>
+                                    <th class="col-action">จัดการ</th>
                                 </tr>
                                 </thead>
 
@@ -211,13 +320,14 @@ $newsRows = $DB->selectAll("
                                         $badgeText  = $isVisible ? 'แสดง' : 'ไม่แสดง';
 
                                         $cover = $row['cover_image'] ?? '';
+                                        $category = NewsContentAnalyzer::normalizeNewsCategory($row['category'] ?? '');
                                         $imgCount = (int)($row['image_count'] ?? 0);
-                                        $updated = $row['updated_at'] ?? $row['created_at'] ?? '';
+                                        $updated = $row['source_published_at'] ?? $row['updated_at'] ?? $row['created_at'] ?? '';
                                     ?>
                                     <tr>
-                                        <td><?= $id ?></td>
+                                        <td class="col-id"><?= $id ?></td>
 
-                                        <td>
+                                        <td class="col-news">
                                             <div class="d-flex align-items-start gap-3">
                                                 <div>
                                                     <?php if (!empty($cover)): ?>
@@ -229,23 +339,26 @@ $newsRows = $DB->selectAll("
                                                     <?php endif; ?>
                                                 </div>
                                                 <div class="title-wrap">
-                                                    <div class="fw-bold text-dark"><?= h($row['title']) ?></div>
-                                                    <?php $snip = snippet($row['detail'], 140); ?>
-                                                    <?php if ($snip !== ''): ?>
-                                                        <div class="muted-snippet"><?= h($snip) ?></div>
-                                                    <?php endif; ?>
+                                                    <?php $snip = snippet(NewsContentAnalyzer::simplifyDetail($row['detail'] ?? ''), 120); ?>
+                                                    <div class="news-headline-row">
+                                                        <div class="fw-bold text-dark news-title"><?= h($row['title']) ?></div>
+                                                        <?php if ($snip !== ''): ?>
+                                                            <div class="muted-snippet"><?= h($snip) ?></div>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
 
-                                        <td><?= h(thaiDateShort($row['posted_date'])) ?></td>
-                                        <td><span class="badge <?= $badgeClass ?>"><?= $badgeText ?></span></td>
-                                        <td><?= $imgCount ?></td>
-                                        <td><?= (int)$row['admin_id'] ?></td>
-                                        <td><?= h($updated) ?></td>
+                                        <td class="col-category"><span class="category-badge"><?= h($category) ?></span></td>
+                                        <td class="col-date"><?= h(thaiDateShort($row['posted_date'])) ?></td>
+                                        <td class="col-status"><span class="badge <?= $badgeClass ?>"><?= $badgeText ?></span></td>
+                                        <td class="col-imgcount"><?= $imgCount ?></td>
+                                        <td class="col-admin"><?= (int)$row['admin_id'] ?></td>
+                                        <td class="col-updated"><?= h(date('d/m/Y H:i', strtotime((string)$updated))) ?></td>
 
-                                        <td>
-                                            <div class="d-flex gap-1">
+                                        <td class="col-action">
+                                            <div class="action-group">
                                                 <a href="news_view.php?id=<?= $id ?>" class="btn btn-outline-primary btn-sm">ดู</a>
                                                 <a href="news_edit.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">แก้ไข</a>
 
@@ -284,9 +397,19 @@ $newsRows = $DB->selectAll("
 $(document).ready(function () {
     $('#newsTable').DataTable({
         pageLength: 10,
-        order: [[2, 'desc'], [0, 'desc']],
+        order: [[3, 'desc'], [0, 'desc']],
+        autoWidth: false,
         columnDefs: [
-            { orderable: false, targets: [1, 7] }
+            { orderable: false, targets: [1, 8] },
+            { className: 'col-id', targets: 0 },
+            { className: 'col-news', targets: 1 },
+            { className: 'col-category', targets: 2 },
+            { className: 'col-date', targets: 3 },
+            { className: 'col-status', targets: 4 },
+            { className: 'col-imgcount', targets: 5 },
+            { className: 'col-admin', targets: 6 },
+            { className: 'col-updated', targets: 7 },
+            { className: 'col-action', targets: 8 }
         ],
         language: {
             search: "ค้นหา:",
@@ -301,6 +424,12 @@ $(document).ready(function () {
                 previous: "ก่อนหน้า"
             }
         }
+    });
+
+    $('#categoryFilter').on('change', function () {
+        const val = this.value;
+        const escaped = $.fn.dataTable.util.escapeRegex(val);
+        $('#newsTable').DataTable().column(2).search(val ? '^' + escaped + '$' : '', true, false).draw();
     });
 
     $(document).on('submit', '.js-delete-form', function (e) {

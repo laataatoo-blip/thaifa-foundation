@@ -50,3 +50,5 @@
     <!-- dark mode -->
     <link rel="stylesheet" href="assets/css/dark-sidebar.css" />
     <link rel="stylesheet" href="assets/css/dark-theme.css" />
+    <!-- THAIFA CI color override -->
+    <link rel="stylesheet" href="./assets/css/thaifa-ci.css" />

@@ -1,0 +1,88 @@
+/* THAIFA CI color overrides (blue theme) */
+:root {
+    --thaifa-primary: #0072ce;
+    --thaifa-primary-hover: #005fae;
+    --thaifa-primary-light: rgba(0, 114, 206, 0.12);
+    --thaifa-primary-focus: rgba(0, 114, 206, 0.35);
+}
+
+.btn-primary {
+    background-color: var(--thaifa-primary) !important;
+    border-color: var(--thaifa-primary) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-check:focus + .btn-primary,
+.btn-check:active + .btn-primary,
+.btn-check:checked + .btn-primary,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle {
+    background-color: var(--thaifa-primary-hover) !important;
+    border-color: var(--thaifa-primary-hover) !important;
+    box-shadow: 0 0 0 0.25rem var(--thaifa-primary-focus) !important;
+}
+
+.btn-outline-primary {
+    color: var(--thaifa-primary) !important;
+    border-color: var(--thaifa-primary) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active,
+.btn-outline-primary.active,
+.btn-outline-primary.dropdown-toggle.show,
+.btn-check:active + .btn-outline-primary,
+.btn-check:checked + .btn-outline-primary {
+    background-color: var(--thaifa-primary) !important;
+    border-color: var(--thaifa-primary) !important;
+    color: #fff !important;
+}
+
+.btn-check:focus + .btn-outline-primary,
+.btn-outline-primary:focus {
+    box-shadow: 0 0 0 0.25rem var(--thaifa-primary-focus) !important;
+}
+
+.bg-primary,
+.bg-split-primary {
+    background-color: var(--thaifa-primary) !important;
+    border-color: var(--thaifa-primary) !important;
+}
+
+.bg-light-primary {
+    background-color: var(--thaifa-primary-light) !important;
+}
+
+.text-primary {
+    color: var(--thaifa-primary) !important;
+}
+
+.border-primary,
+.border-lg-top-primary {
+    border-color: var(--thaifa-primary) !important;
+}
+
+.sidebar-wrapper .metismenu a:hover,
+.sidebar-wrapper .metismenu a:focus,
+.sidebar-wrapper .metismenu a:active,
+.sidebar-wrapper .metismenu .mm-active > a {
+    color: var(--thaifa-primary) !important;
+    background: var(--thaifa-primary-light) !important;
+}
+
+.page-item.active .page-link,
+.pagination .active > .page-link {
+    background-color: var(--thaifa-primary) !important;
+    border-color: var(--thaifa-primary) !important;
+}
+
+.page-link,
+a {
+    color: var(--thaifa-primary);
+}
+
+a:hover {
+    color: var(--thaifa-primary-hover);
+}

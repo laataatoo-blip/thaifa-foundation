@@ -4,8 +4,8 @@ $MM_authorizedUsers = "1,2,3";
 $MM_donotCheckaccess = "false";
 include('./components/funcCheckSession.php');
 
-include('./backend/classes/DatabaseManagement.class.php');
-include('./backend/classes/Program.class.php');
+include(__DIR__ . '/../backend/classes/DatabaseManagement.class.php');
+include(__DIR__ . '/../backend/classes/Program.class.php');
 $DB = new DatabaseManagement();
 $Program = new Program();
 

@@ -1,3 +1,50 @@
+<?php
+include(__DIR__ . '/backend/classes/DatabaseManagement.class.php');
+$DB = new DatabaseManagement();
+
+function h($str)
+{
+    return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8');
+}
+
+function imageUrlForFrontend($path)
+{
+    $path = trim((string)$path);
+    if ($path === '') {
+        return 'assets/images/about aplic.jpg';
+    }
+    if (preg_match('#^https?://#i', $path)) {
+        return $path;
+    }
+    $clean = ltrim($path, '/');
+    if (strpos($clean, 'admin/') === 0) {
+        return $clean;
+    }
+    if (strpos($clean, 'uploads/') === 0) {
+        return 'admin/' . $clean;
+    }
+    return $clean;
+}
+
+$aboutHeroImage = 'assets/images/about aplic.jpg';
+try {
+    $row = $DB->selectOne("
+        SELECT ni.image_url
+        FROM news n
+        INNER JOIN news_images ni ON ni.news_id = n.id
+        WHERE n.is_visible = 1
+          AND ni.image_url IS NOT NULL
+          AND ni.image_url <> ''
+        ORDER BY COALESCE(n.source_published_at, CONCAT(n.posted_date, ' 00:00:00')) DESC, ni.sort_order ASC, ni.id ASC
+        LIMIT 1
+    ");
+    if (!empty($row['image_url'])) {
+        $aboutHeroImage = imageUrlForFrontend($row['image_url']);
+    }
+} catch (Throwable $e) {
+    $aboutHeroImage = 'assets/images/about aplic.jpg';
+}
+?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -77,72 +124,104 @@
 </head>
 <body>
     
-<!-- Navigation -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-  <!-- Top Bar -->
-  <div class="bg-secondary/30 border-b border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-10 text-sm">
-        <div class="hidden md:flex items-center gap-6 text-foreground/80">
-          <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-2 hover:text-primary transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            <span>thaifafoundation@gmail.com</span>
-          </a>
+    <!-- Navigation - Fixed Top, 2-tier -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <!-- Top Bar -->
+        <div class="bg-secondary/30 border-b border-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-10 text-sm">
+                    <div class="hidden md:flex items-center gap-6 text-foreground/80">
+                        <a href="mailto:thaifafoundation@gmail.com"
+                            class="flex items-center gap-2 hover:text-primary transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span>thaifafoundation@gmail.com</span>
+                        </a>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span
+                                class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                        </a>
+
+                        <div class="flex items-center gap-2 pl-4 border-l border-border">
+                            <a href="login.php"
+                                class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                            </a>
+                            <span class="text-foreground/40">/</span>
+                            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
+                                <span class="hidden sm:inline">สมัครสมาชิก</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="flex items-center gap-4">
-          <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-            <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
-          </a>
+        <!-- Main Navigation -->
+        <div class="bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <a href="index.php" class="flex-shrink-0">
+                        <img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto" />
+                    </a>
 
-          <div class="flex items-center gap-2 pl-4 border-l border-border">
-            <a href="login.php" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              <span class="hidden sm:inline">เข้าสู่ระบบ</span>
-            </a>
-            <span class="text-foreground/40">/</span>
-            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
-              <span class="hidden sm:inline">สมัครสมาชิก</span>
-            </a>
-          </div>
+                    <!-- Main Navigation Links -->
+                    <div class="flex items-center gap-1 flex-wrap">
+                        <a href="index.php"
+                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">หน้าแรก</a>
+                        <a href="about.php"
+                            class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md hover:bg-sky-100 transition-colors">เกี่ยวกับเรา</a>
+                        <a href="calendar.php"
+                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ปฏิทิน</a>
+                        <a href="shop.php"
+                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ร้านค้า</a>
+                        <a href="donate.php"
+                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">การบริจาค</a>
+                        <a href="volunteer.php"
+                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">จิตอาสา</a>
+                        <a href="stories.php"
+                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">เสียงจากใจ</a>
+                        <a href="contact.php"
+                            class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors">ติดต่อเรา</a>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button class="hidden p-2" onclick="toggleMobileMenu()">
+                        <div class="w-6 h-5 flex flex-col justify-between">
+                            <span class="w-full h-0.5 bg-primary"></span>
+                            <span class="w-full h-0.5 bg-primary"></span>
+                            <span class="w-full h-0.5 bg-primary"></span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu -->
+                <div id="mobileMenu" class="hidden border-t border-border bg-white">
+                    <a href="index.php" class="block px-4 py-3 border-b border-border">หน้าแรก</a>
+                    <a href="about.php" class="block px-4 py-3 border-b border-border bg-sky-50 text-[#315d9f]">เกี่ยวกับเรา</a>
+                    <a href="calendar.php" class="block px-4 py-3 border-b border-border">ปฏิทิน</a>
+                    <a href="shop.php" class="block px-4 py-3 border-b border-border">ร้านค้า</a>
+                    <a href="donate.php" class="block px-4 py-3 border-b border-border">การบริจาค</a>
+                    <a href="volunteer.php" class="block px-4 py-3 border-b border-border">จิตอาสา</a>
+                    <a href="stories.php" class="block px-4 py-3 border-b border-border">เสียงจากใจ</a>
+                    <a href="contact.php" class="block px-4 py-3">ติดต่อเรา</a>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Navigation -->
-  <div class="bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20">
-        <a href="index.php" class="flex-shrink-0">
-          <img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto" />
-        </a>
-
-        <!-- เมนูโชว์ทันที -->
-        <div class="flex items-center gap-1 flex-wrap">
-          <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
-          <a href="about.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">เกี่ยวกับเรา</a>
-          <a href="calendar.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a>
-          <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
-          <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
-          <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
-          <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
-          <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
+    </nav>
 
 <!-- Main Content -->
 <main class="pt-[120px]">
@@ -167,8 +246,9 @@
                     <div class="relative">
                         <div class="relative rounded-3xl overflow-hidden shadow-xl">
                             <img
-                                src="https://via.placeholder.com/800x500/233882/FFFFFF?text=THAIFA+2025"
+                                src="<?= h($aboutHeroImage) ?>"
                                 alt="THAIFA Foundation - มอบทุนการศึกษา"
+                                onerror="this.onerror=null;this.src='assets/images/about aplic.jpg';"
                                 class="w-full h-[500px] object-cover"
                             />
                             <!-- Figma: figma:asset/4e491dc46acd78e1aa2e8dda1d3918386daea8f0.png -->
@@ -672,7 +752,7 @@
                 <!-- About -->
                 <div>
                     <div class="mb-6">
-                        <img src="https://via.placeholder.com/150x64/FFFFFF/FFFFFF?text=THAIFA" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
+                        <img src="assets/images/Blue logo.png" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
                     </div>
                     <p class="text-white/80 text-sm leading-relaxed mb-4">
                         มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน มุ่งมั่นสร้างโอกาสและพัฒนาคุณภาพชีวิตของเด็กและเยาวชนไทย
@@ -842,6 +922,12 @@
 
     <script>
         let isExpanded = false;
+
+        function toggleMobileMenu() {
+            const el = document.getElementById('mobileMenu');
+            if (!el) return;
+            el.classList.toggle('hidden');
+        }
         
         function toggleContent() {
             const content = document.getElementById('additional-content');

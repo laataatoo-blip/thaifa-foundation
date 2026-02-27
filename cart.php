@@ -327,7 +327,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                 <div>
                     <div class="mb-6">
-                        <img src="https://via.placeholder.com/150x64/FFFFFF/FFFFFF?text=THAIFA" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
+                        <img src="assets/images/Blue logo.png" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
                     </div>
                     <p class="text-white/80 text-sm leading-relaxed mb-4">
                         มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน มุ่งมั่นสร้างโอกาสและพัฒนาคุณภาพชีวิตของเด็กและเยาวชนไทย

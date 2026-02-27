@@ -8,7 +8,7 @@ $MM_authorizedUsers = "1,2,3,4";
 $MM_donotCheckaccess = "false";
 include('./components/funcCheckSession.php');
 
-include('./backend/classes/DatabaseManagement.class.php');
+include(__DIR__ . '/../backend/classes/DatabaseManagement.class.php');
 $DB = new DatabaseManagement();
 
 function h($str) {
