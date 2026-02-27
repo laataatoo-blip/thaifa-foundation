@@ -771,4 +771,3 @@ $initialNewsVisible = 3;
 </body>
 
 </html>
-
