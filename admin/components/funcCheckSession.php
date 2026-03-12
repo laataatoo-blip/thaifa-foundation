@@ -29,7 +29,11 @@ function isAuthorized($strUsers, $strGroups, $UserName, $UserGroup)
 }
 
 $RedirectPath = "login.php";
-if (!isset($_SESSION['AdminLogin']) || isAuthorized($MM_donotCheckaccess, $MM_authorizedUsers, $_SESSION['AdminLogin']['AdminID'], $_SESSION['AdminLoginType']['Thaifa']) == false) {
+$adminLogin = $_SESSION['AdminLogin'] ?? null;
+$adminId = (string)($adminLogin['AdminID'] ?? '');
+$adminType = (string)($_SESSION['AdminLoginType']['Thaifa'] ?? $_SESSION['AdminLoginType']['SchoolHub'] ?? '');
+
+if (!is_array($adminLogin) || isAuthorized("", $MM_authorizedUsers, $adminId, $adminType) == false) {
 	$MM_qsChar = "?";
 	$MM_referrer = $_SERVER['PHP_SELF'];
 	if (strpos($RedirectPath, "?")) $MM_qsChar = "&";
@@ -38,4 +42,17 @@ if (!isset($_SESSION['AdminLogin']) || isAuthorized($MM_donotCheckaccess, $MM_au
 	$RedirectPath = $RedirectPath . $MM_qsChar . "accesscheck=" . urlencode($MM_referrer);
 	header("Location: " . $RedirectPath);
 	exit;
+}
+
+if (!class_exists('AdminSecurityManagement')) {
+	include_once(__DIR__ . '/../../backend/classes/AdminSecurityManagement.class.php');
+}
+if (class_exists('AdminSecurityManagement')) {
+	$adminSecurityAudit = new AdminSecurityManagement();
+	if (!$adminSecurityAudit->isCurrentSessionAllowed()) {
+		session_destroy();
+		header("Location: login.php?revoked=1");
+		exit;
+	}
+	$adminSecurityAudit->touchCurrentAdminSession();
 }

@@ -1,227 +1,538 @@
+<?php
+session_start();
+include_once(__DIR__ . '/backend/classes/ShopManagement.class.php');
+include_once(__DIR__ . '/backend/helpers/i18n.php');
+thaifa_i18n_buffer_start();
+
+$shop = new ShopManagement();
+
+function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+function baht($v) { return number_format((float)$v, 2); }
+
+$flash = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_to_cart') {
+    $pid = (int)($_POST['product_id'] ?? 0);
+    $qty = max(1, (int)($_POST['qty'] ?? 1));
+    if ($pid > 0) {
+        $shop->addToCart($pid, $qty);
+        $flash = 'เพิ่มสินค้าลงตะกร้าแล้ว';
+    }
+}
+
+$allProducts = $shop->getProducts(true);
+$cartCount = $shop->cartCount();
+
+$categoriesMap = [];
+foreach ($allProducts as $p) {
+    $name = trim((string)($p['category_name'] ?: 'ทั่วไป'));
+    $categoriesMap[$name] = $name;
+}
+$categories = array_values($categoriesMap);
+sort($categories, SORT_NATURAL | SORT_FLAG_CASE);
+
+$selectedCategory = trim((string)($_GET['cat'] ?? ''));
+$q = trim((string)($_GET['q'] ?? ''));
+$sort = trim((string)($_GET['sort'] ?? 'new'));
+
+$products = array_filter($allProducts, function ($p) use ($selectedCategory, $q) {
+    if ($selectedCategory !== '' && ($p['category_name'] ?? 'ทั่วไป') !== $selectedCategory) {
+        return false;
+    }
+    if ($q !== '') {
+        $hay = mb_strtolower(($p['name'] ?? '') . ' ' . ($p['description'] ?? ''), 'UTF-8');
+        if (mb_stripos($hay, mb_strtolower($q, 'UTF-8'), 0, 'UTF-8') === false) {
+            return false;
+        }
+    }
+    return true;
+});
+
+if ($sort === 'price_asc') {
+    usort($products, fn($a, $b) => (float)$a['price'] <=> (float)$b['price']);
+} elseif ($sort === 'price_desc') {
+    usort($products, fn($a, $b) => (float)$b['price'] <=> (float)$a['price']);
+} elseif ($sort === 'popular') {
+    usort($products, fn($a, $b) => ((int)$b['id'] * 7 % 97) <=> ((int)$a['id'] * 7 % 97));
+} else {
+    usort($products, fn($a, $b) => (int)$b['id'] <=> (int)$a['id']);
+}
+
+$featuredProducts = array_slice($products, 0, 4);
+$popularCategories = array_slice($categories, 0, 8);
+
+$categoryIcons = ['📚','👕','👜','🎁','🧸','🕯️','🏅','💡'];
+?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= htmlspecialchars(thaifa_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ร้านค้า - THAIFA Foundation</title>
+    <title>ร้านค้าตระกล้า - THAIFA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Prompt', sans-serif; border-color: #e2e8f0; }
-        body { background: #ffffff; color: #303a56; }
+        :root {
+            --font-size: 16px;
+            --background: #ffffff;
+            --foreground: #303a56;
+            --primary: #233882;
+            --secondary: #d9e7ef;
+            --accent: #e83b3b;
+            --border: #e2e8f0;
+        }
+        body, * { font-family: 'Prompt', sans-serif; }
+        body { background-color: #f3f5f7; color: var(--foreground); font-size: var(--font-size); }
+        * { border-color: var(--border); }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-shadow { box-shadow: 0 8px 20px rgba(34, 52, 110, 0.06); }
+        .product-shell {
+            border-radius: 12px;
+            border: 1px solid #e4e9f1;
+            background: #fff;
+            box-shadow: 0 4px 14px rgba(31, 42, 68, 0.06);
+            transition: none;
+        }
+        .product-shell:hover {
+            transform: none;
+            box-shadow: 0 4px 14px rgba(31, 42, 68, 0.06);
+        }
+        .product-visual {
+            height: 210px;
+            background: #f5f6f8;
+            border-bottom: 1px solid #e9edf4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .product-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .pill-tag {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            padding: 3px 9px;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid #d4dcec;
+            color: #42506d;
+        }
+        .action-outline {
+            border: 1px solid #233882;
+            background: #ffffff;
+            color: #233882;
+        }
+        .action-filled {
+            background: #233882;
+            color: #ffffff;
+        }
+        .action-filled:hover {
+            background: #1b2f72;
+        }
+        .shop-card-title {
+            color: #1f2a44;
+            font-size: 16px;
+            line-height: 1.25;
+            min-height: 40px;
+        }
+        .shop-card-desc {
+            color: #6b778f;
+            font-size: 13px;
+            line-height: 1.38;
+            min-height: 34px;
+        }
+        .shop-card-price {
+            color: #d51d3c;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+        .shop-card-meta {
+            color: #5c6882;
+            font-size: 12px;
+        }
+        .shop-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .shop-cart-btn {
+            height: 34px;
+            min-width: 118px;
+            border-radius: 999px;
+            border: 1px solid #233882;
+            background: #233882;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .shop-cart-btn:hover {
+            background: #1b2f72;
+        }
+        .shop-stock-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            font-size: 11px;
+            color: #3e4b6a;
+            background: #eef3ff;
+            border: 1px solid #d7e2fb;
+            padding: 5px 9px;
+        }
+        .shop-impact-wrap {
+            margin-top: 30px;
+            border-radius: 20px;
+            background: #dfe5ec;
+            padding: 16px;
+        }
+        .shop-impact-card {
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            box-shadow: 0 8px 20px rgba(35, 56, 130, 0.07);
+            padding: 22px 20px 18px;
+        }
+        .shop-impact-top {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            text-align: center;
+        }
+        .shop-impact-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .shop-impact-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+        .shop-impact-title {
+            margin-top: 8px;
+            font-size: 20px;
+            line-height: 1.25;
+            color: #233882;
+        }
+        .shop-impact-text {
+            margin-top: 4px;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #7c8799;
+        }
+        .shop-impact-divider {
+            margin: 18px 0 16px;
+            border-top: 1px solid #dbe3ef;
+        }
+        .shop-impact-fund-title {
+            text-align: center;
+            font-size: 22px;
+            line-height: 1.2;
+            color: #233882;
+            margin-bottom: 14px;
+        }
+        .shop-impact-bottom {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .shop-impact-fund-card {
+            border-radius: 14px;
+            background: #f3f5f7;
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .shop-impact-fund-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .shop-impact-fund-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+        .shop-impact-fund-head {
+            font-size: 18px;
+            line-height: 1.3;
+            color: #233882;
+        }
+        .shop-impact-fund-desc {
+            margin-top: 3px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #7c8799;
+        }
+        @media (max-width: 1024px) {
+            .shop-impact-title { font-size: 18px; }
+            .shop-impact-text { font-size: 13px; }
+            .shop-impact-fund-title { font-size: 20px; }
+            .shop-impact-fund-head { font-size: 16px; }
+            .shop-impact-fund-desc { font-size: 12px; }
+        }
+        @media (max-width: 767px) {
+            .shop-impact-wrap { padding: 10px; margin-top: 22px; border-radius: 16px; }
+            .shop-impact-card { padding: 16px 12px 14px; border-radius: 14px; }
+            .shop-impact-top { grid-template-columns: 1fr; gap: 14px; }
+            .shop-impact-title { font-size: 17px; margin-top: 6px; }
+            .shop-impact-text { font-size: 13px; margin-top: 3px; }
+            .shop-impact-divider { margin: 16px 0 12px; }
+            .shop-impact-fund-title { font-size: 18px; margin-bottom: 10px; }
+            .shop-impact-bottom { grid-template-columns: 1fr; gap: 12px; }
+            .shop-impact-fund-card { border-radius: 12px; padding: 12px; }
+            .shop-impact-fund-icon { width: 34px; height: 34px; }
+            .shop-impact-fund-icon svg { width: 16px; height: 16px; }
+            .shop-impact-fund-head { font-size: 15px; }
+            .shop-impact-fund-desc { font-size: 12px; }
+            .product-visual { height: 180px; }
+            .shop-card-title { font-size: 15px; min-height: 36px; }
+            .shop-card-desc { font-size: 12px; min-height: 28px; }
+            .shop-card-price { font-size: 18px; }
+            .shop-cart-btn { height: 32px; font-size: 12px; min-width: 110px; }
+        }
     </style>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#233882',
-                        accent: '#e83b3b',
-                        secondary: '#d9e7ef',
                         foreground: '#303a56',
-                        border: '#e2e8f0',
+                        primary: '#233882',
+                        secondary: '#d9e7ef',
+                        accent: '#e83b3b',
+                        border: '#e2e8f0'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-white to-secondary/10">
+<body>
 
-    <!-- Navigation - Same structure -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
         <div class="bg-secondary/30 border-b border-border">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-10 text-sm">
                     <div class="hidden md:flex items-center gap-6 text-foreground/80">
                         <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-2 hover:text-primary transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                             <span>thaifafoundation@gmail.com</span>
                         </a>
                     </div>
                     <div class="flex items-center gap-4">
                         <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                            <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?= (int)$cartCount ?></span>
                         </a>
-                        <div class="flex items-center gap-2 pl-4 border-l border-border">
+                        <div class="flex items-center gap-1"><a href="<?= h(thaifa_lang_url('th')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='th' ? 'bg-primary text-white' : 'text-foreground/70 hover:text-primary' ?>">TH</a><a href="<?= h(thaifa_lang_url('en')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='en' ? 'bg-primary text-white' : 'text-foreground/70 hover:text-primary' ?>">EN</a></div><div class="flex items-center gap-2 pl-4 border-l border-border">
                             <a href="login.php" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                <span class="hidden sm:inline"><?= h(thaifa_t('login')) ?></span>
                             </a>
                             <span class="text-foreground/40">/</span>
-                            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors"><span class="hidden sm:inline">สมัครสมาชิก</span></a>
+                            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors"><span class="hidden sm:inline"><?= h(thaifa_t('register')) ?></span></a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-20">
-                    <!-- Logo -->
-                    <a href="index.php" class="flex-shrink-0">
-                        <img src="assets/images/Logo.png" 
-                            alt="THAIFA Logo" class="h-20 w-auto" />
-                    </a>
+                    <a href="index.php" class="flex-shrink-0"><img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto" /></a>
                     <div class="hidden lg:flex items-center gap-1">
-                        <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
-                        <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
-                        <a href="calendar.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a>
-                        <a href="shop.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">ร้านค้า</a>
-                        <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
-                        <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
-                        <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
-                        <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
+                        <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors"><?= h(thaifa_t('home')) ?></a>
+                        <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors"><?= h(thaifa_t('about')) ?></a>
+                        <a href="calendar.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors"><?= h(thaifa_t('calendar')) ?></a>
+                        <a href="shop.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md"><?= h(thaifa_t('shop')) ?></a>
+                        <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors"><?= h(thaifa_t('donate')) ?></a>
+                        <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors"><?= h(thaifa_t('volunteer')) ?></a>
+                        <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors"><?= h(thaifa_t('stories')) ?></a>
+                        <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100 transition-colors"><?= h(thaifa_t('contact')) ?></a>
                     </div>
+                    <button class="lg:hidden p-2" onclick="toggleMobileMenu()">
+                        <div class="w-6 h-5 flex flex-col justify-between"><span class="w-full h-0.5 bg-primary"></span><span class="w-full h-0.5 bg-primary"></span><span class="w-full h-0.5 bg-primary"></span></div>
+                    </button>
+                </div>
+                <div id="mobileMenu" class="hidden border-t border-border bg-white">
+                    <a href="index.php" class="block px-4 py-3 border-b border-border"><?= h(thaifa_t('home')) ?></a>
+                    <a href="about.php" class="block px-4 py-3 border-b border-border"><?= h(thaifa_t('about')) ?></a>
+                    <a href="calendar.php" class="block px-4 py-3 border-b border-border"><?= h(thaifa_t('calendar')) ?></a>
+                    <a href="shop.php" class="block px-4 py-3 border-b border-border bg-sky-50 text-[#315d9f]"><?= h(thaifa_t('shop')) ?></a>
+                    <a href="donate.php" class="block px-4 py-3 border-b border-border"><?= h(thaifa_t('donate')) ?></a>
+                    <a href="volunteer.php" class="block px-4 py-3 border-b border-border"><?= h(thaifa_t('volunteer')) ?></a>
+                    <a href="stories.php" class="block px-4 py-3 border-b border-border"><?= h(thaifa_t('stories')) ?></a>
+                    <a href="contact.php" class="block px-4 py-3 border-b border-border"><?= h(thaifa_t('contact')) ?></a>
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="pt-[120px]">
-        <!-- Header -->
-        <section class="py-16 bg-primary text-white">
+        <section class="bg-gradient-to-br from-primary to-primary/80 text-white py-8 md:py-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
-                    <h1 class="text-4xl md:text-5xl mb-4">ร้านค้ามูลนิธิ</h1>
-                    <p class="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-                        สินค้าของมูลนิธิ รายได้สมทบกองทุนการกุศล
+                    <div class="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-1.5 mb-3 text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1 5h12M7 13L5.4 5M17 18a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 100 4 2 2 0 000-4z"/>
+                        </svg>
+                        <span>ร้านค้ามูลนิธิ</span>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl mb-3">สินค้าและของที่ระลึก</h1>
+                    <p class="text-base text-white/90 max-w-2xl mx-auto">
+                        ช้อปเพื่อส่งต่อโอกาส รายได้สมทบกองทุนการกุศลของมูลนิธิ
                     </p>
                 </div>
             </div>
         </section>
 
-        <!-- Products Grid -->
-        <section class="py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <!-- Product 1: คัมภีร์ 2 เล่ม -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all group flex flex-col">
-                        <div class="relative h-80 overflow-hidden bg-secondary/10">
-                            <img src="https://via.placeholder.com/400x320/233882/FFFFFF?text=VIP+Book" alt="คัมภีร์ 2 เล่ม" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <!-- Figma: figma:asset/d17aacebad4380e146b8097977451a24c9de552b.png -->
-                        </div>
-                        <div class="p-6 flex flex-col flex-1">
-                            <h3 class="text-2xl text-primary mb-2">คัมภีร์ 2 เล่ม</h3>
-                            <p class="text-foreground/70 mb-4 flex-1">เซ็ทกล่องผ้าไหมของคัมภีร์ 2 เล่ม ที่นักขายไม่ควรพลาด หนังสือจากความล้มเหลว สู่ความสำเร็จในการขาย และชายทุกสถานี</p>
-                            <div class="flex items-center justify-between mt-auto">
-                                <div class="text-2xl text-accent">฿1,000</div>
-                                <button onclick="alert('เพิ่มคัมภีร์ 2 เล่มลงตะกร้า')" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                    เพิ่มลงตะกร้า
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <?php if ($flash): ?>
+                <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-green-700"><?= h($flash) ?></div>
+            <?php endif; ?>
 
-                    <!-- Product 2: เสื้อยืด -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all group flex flex-col">
-                        <div class="relative h-80 overflow-hidden bg-secondary/10">
-                            <img src="https://via.placeholder.com/400x320/233882/FFFFFF?text=T-Shirt" alt="เสื้อยืด THAIFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <!-- Figma: figma:asset/9649dc081e140db29b5c00fa711cf9884bb8d171.png -->
-                        </div>
-                        <div class="p-6 flex flex-col flex-1">
-                            <h3 class="text-2xl text-primary mb-2">เสื้อยืด THAIFA</h3>
-                            <p class="text-foreground/70 mb-4 flex-1">เสื้อยืดผ้าฝ้าย 100% คุณภาพดี พร้อมโลโก้มูลนิธิ</p>
-                            <div class="flex items-center justify-between mt-auto">
-                                <div class="text-2xl text-accent">฿590</div>
-                                <button onclick="alert('เพิ่มเสื้อยืด THAIFAลงตะกร้า')" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                    เพิ่มลงตะกร้า
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            <div class="bg-white rounded-xl card-shadow border p-3 md:p-4 mb-4">
+                <form method="get" class="grid md:grid-cols-12 gap-2 mb-3">
+                    <input type="text" name="q" value="<?= h($q) ?>" placeholder="ค้นหาสินค้าในร้านมูลนิธิ" class="md:col-span-6 h-10 rounded-lg border px-3 text-sm">
+                    <select name="cat" class="md:col-span-3 h-10 rounded-lg border px-3 text-sm">
+                        <option value="">ทุกหมวดหมู่</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= h($cat) ?>" <?= $selectedCategory === $cat ? 'selected' : '' ?>><?= h($cat) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select name="sort" class="md:col-span-3 h-10 rounded-lg border px-3 text-sm">
+                        <option value="new" <?= $sort === 'new' ? 'selected' : '' ?>>ใหม่ล่าสุด</option>
+                        <option value="popular" <?= $sort === 'popular' ? 'selected' : '' ?>>ยอดนิยม</option>
+                        <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>ราคาน้อย-มาก</option>
+                        <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>ราคามาก-น้อย</option>
+                    </select>
+                </form>
 
-                    <!-- Product 3: พระคลัง -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all group flex flex-col">
-                        <div class="relative h-80 overflow-hidden bg-secondary/10">
-                            <img src="https://via.placeholder.com/400x320/233882/FFFFFF?text=Amulet" alt="พระคลังมหาสมบัติ" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <!-- Figma: figma:asset/0892268be9cf9754496a909138d1bb90217f8415.png -->
-                        </div>
-                        <div class="p-6 flex flex-col flex-1">
-                            <h3 class="text-2xl text-primary mb-2">พระคลังมหาสมบัติ</h3>
-                            <p class="text-foreground/70 mb-4 flex-1">พระคลังมหาสมบัติ ชนิดทองแดง 95% รวมคำพ่นทรายพิเศษ</p>
-                            <div class="flex items-center justify-between mt-auto">
-                                <div class="text-2xl text-accent">฿490</div>
-                                <button onclick="alert('เพิ่มพระคลังมหาสมบัติลงตะกร้า')" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                    เพิ่มลงตะกร้า
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product 4: กระเป๋าผ้าห่ม -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all group flex flex-col">
-                        <div class="relative h-80 overflow-hidden bg-secondary/10">
-                            <img src="https://via.placeholder.com/400x320/233882/FFFFFF?text=Blanket+Bag" alt="กระเป๋าผ้าห่ม" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <!-- Figma: figma:asset/f37178524385e6f0fa01f4c9ae07907c65b82832.png -->
-                        </div>
-                        <div class="p-6 flex flex-col flex-1">
-                            <h3 class="text-2xl text-primary mb-2">กระเป๋าผ้าห่ม</h3>
-                            <p class="text-foreground/70 mb-4 flex-1">กระเป๋าผ้าห่ม ขนาด 40x60 นิ้ว นุ่มสบาย พกพาสะดวก</p>
-                            <div class="flex items-center justify-between mt-auto">
-                                <div class="text-2xl text-accent">฿199</div>
-                                <button onclick="alert('เพิ่มกระเป๋าผ้าห่มลงตะกร้า')" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                    เพิ่มลงตะกร้า
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-        </section>
 
-        <!-- Additional Info -->
-        <section class="py-12 bg-secondary/20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-white rounded-2xl p-8 shadow-lg">
-                    <div class="grid md:grid-cols-3 gap-6 text-center">
-                        <div>
-                            <svg class="w-10 h-10 text-primary mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                            <h4 class="text-lg text-primary mb-2">จัดส่งทั่วประเทศ</h4>
-                            <p class="text-sm text-foreground/70">ส่งฟรีทางไปรษณีย์หรือขนส่ง</p>
-                        </div>
-                        <div>
-                            <svg class="w-10 h-10 text-accent mx-auto mb-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
-                            <h4 class="text-lg text-primary mb-2">รายได้เพื่อการกุศล</h4>
-                            <p class="text-sm text-foreground/70">100% เข้ากองทุนมูลนิธิ</p>
-                        </div>
-                        <div>
-                            <svg class="w-10 h-10 text-primary mx-auto mb-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-                            <h4 class="text-lg text-primary mb-2">สินค้าคุณภาพ</h4>
-                            <p class="text-sm text-foreground/70">ผลิตด้วยมาตรฐานสูง</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Fund Distribution -->
-                    <div class="border-t border-border pt-8 mt-8">
-                        <h4 class="text-lg text-primary mb-4 text-center">การจัดสรรเงินกองทุน</h4>
-                        <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                            <div class="bg-secondary/10 rounded-xl p-6">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
-                                        <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/></svg>
+            <?php if (empty($products)): ?>
+                <div class="bg-white rounded-2xl border p-10 text-center text-slate-500">ไม่พบสินค้าตามเงื่อนไข</div>
+            <?php else: ?>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <?php foreach ($products as $p): ?>
+                        <?php $sold = ((int)$p['id'] * 11) % 120 + 8; ?>
+                        <div class="product-shell overflow-hidden">
+                            <div class="product-visual">
+                                <img src="<?= h($p['cover_image'] ?: 'https://via.placeholder.com/800x600?text=Product') ?>" alt="<?= h($p['name']) ?>">
+                                <span class="pill-tag"><?= h($p['category_name'] ?: 'Other') ?></span>
+                            </div>
+
+                            <div class="p-3.5">
+                                <h3 class="shop-card-title line-clamp-2"><?= h($p['name']) ?></h3>
+                                <p class="shop-card-desc mt-2 line-clamp-2"><?= h($p['description']) ?></p>
+
+                                <div class="shop-card-footer">
+                                    <div class="shop-card-price">฿<?= baht($p['price']) ?></div>
+                                    <span class="shop-stock-chip">คงเหลือ <?= (int)$p['stock_qty'] ?></span>
+                                </div>
+
+                                <div class="mt-3 flex items-center justify-between shop-card-meta">
+                                    <div>ขายแล้ว <?= (int)$sold ?> ชิ้น</div>
+                                    <div class="inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.243-4.243a8 8 0 1111.313 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        ไทย
                                     </div>
-                                    <div>
-                                        <h5 class="text-primary mb-2">ทุนการศึกษาและการสงเคราะห์</h5>
-                                        <p class="text-sm text-foreground/70">สนับสนุนการศึกษาและช่วยเหลือผู้ด้อยโอกาส</p>
-                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <form method="post" class="w-full">
+                                        <input type="hidden" name="action" value="add_to_cart">
+                                        <input type="hidden" name="product_id" value="<?= (int)$p['id'] ?>">
+                                        <input type="hidden" name="qty" value="1">
+                                        <button type="submit" class="shop-cart-btn w-full">เพิ่มลงตะกร้า</button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="bg-secondary/10 rounded-xl p-6">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
-                                        <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"/></svg>
-                                    </div>
-                                    <div>
-                                        <h5 class="text-primary mb-2">ค่าใช้จ่ายบริหาร</h5>
-                                        <p class="text-sm text-foreground/70">ค่าขนส่ง ค่าใช้จ่ายในการประชุม และค่าเดินทาง</p>
-                                    </div>
-                                </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="shop-impact-wrap">
+                <div class="shop-impact-card">
+                    <div class="shop-impact-top">
+                        <div>
+                            <div class="shop-impact-icon bg-[#eef3ff] text-[#233882]">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1 5h12M7 13L5.4 5M17 18a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 100 4 2 2 0 000-4"/>
+                                </svg>
+                            </div>
+                            <h3 class="shop-impact-title">จัดส่งทั่วประเทศ</h3>
+                            <p class="shop-impact-text">ส่งฟรีทางไปรษณีย์หรือขนส่ง</p>
+                        </div>
+                        <div>
+                            <div class="shop-impact-icon bg-[#ffeef0] text-[#ef4444]">
+                                <svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                                </svg>
+                            </div>
+                            <h3 class="shop-impact-title">รายได้เพื่อการกุศล</h3>
+                            <p class="shop-impact-text">100% เข้ากองทุนมูลนิธิ</p>
+                        </div>
+                        <div>
+                            <div class="shop-impact-icon bg-[#eef3ff] text-[#233882]">
+                                <svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h3 class="shop-impact-title">สินค้าคุณภาพ</h3>
+                            <p class="shop-impact-text">ผลิตด้วยมาตรฐานสูง</p>
+                        </div>
+                    </div>
+
+                    <div class="shop-impact-divider"></div>
+                    <h3 class="shop-impact-fund-title">การจัดสรรเงินกองทุน</h3>
+
+                    <div class="shop-impact-bottom">
+                        <div class="shop-impact-fund-card">
+                            <div class="shop-impact-fund-icon bg-[#e7edf9] text-[#233882]">
+                                <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 3l9 4.5-9 4.5L3 7.5 12 3zm-7 8.25l7 3.5 7-3.5V16h2v-5.75l-9 4.5-9-4.5V16h2v-4.75zM8 17h8v2H8v-2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="shop-impact-fund-head">ทุนการศึกษาและการสงเคราะห์</div>
+                                <div class="shop-impact-fund-desc">สนับสนุนการศึกษาและช่วยเหลือผู้ด้อยโอกาส</div>
+                            </div>
+                        </div>
+                        <div class="shop-impact-fund-card">
+                            <div class="shop-impact-fund-icon bg-[#ffe7e9] text-[#ef4444]">
+                                <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M9 2h6a1 1 0 011 1v2h2a2 2 0 012 2v2H4V7a2 2 0 012-2h2V3a1 1 0 011-1zm1 3h4V4h-4v1zM4 11h16v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="shop-impact-fund-head">ค่าใช้จ่ายบริหาร</div>
+                                <div class="shop-impact-fund-desc">ค่าขนส่ง ค่าใช้จ่ายในการประชุม และค่าเดินทาง</div>
                             </div>
                         </div>
                     </div>
@@ -230,197 +541,14 @@
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-primary text-white pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <div>
-                    <div class="mb-6">
-                        <img src="assets/images/Blue logo.png" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
-                    </div>
-                    <p class="text-white/80 text-sm leading-relaxed mb-4">
-                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน มุ่งมั่นสร้างโอกาสและพัฒนาคุณภาพชีวิตของเด็กและเยาวชนไทย
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
-                        <span class="text-white/90 text-sm">ขอบคุณที่ร่วมเคียงฝันไปด้วยกัน</span>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="mb-6 text-xl">เมนูหลัก</h3>
-                    <ul class="space-y-3">
-                        <li><a href="index.php" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
-                        <li><a href="about.php" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
-                        <li><a href="donate.php" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
-                        <li><a href="volunteer.php" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
-                        <li><a href="stories.php" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
-                        <li><a href="contact.php" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="mb-6 text-xl">โครงการของเรา</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">ทุนการศึกษา</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">ช่วยเหลือเด็กกำพร้า</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">เครื่องมือแพทย์</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">กิจกรรมชุมชน</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">เสียงจากใจผู้รับ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="mb-6 text-xl">ติดต่อเรา</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span class="text-white/80 text-sm">
-                                อาคาร จูเวลเลอรี่ ห้อง 138/32 ชั้น 12<br />
-                                เลขที่ 138 ถนนนเรศ แขวงสี่พระยา<br />
-                                เขตบางรัก กรุงเทพฯ 10500
-                            </span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <svg class="w-5 h-5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <span class="text-white/80 text-sm">thaifafoundation@gmail.com</span>
-                        </li>
-                    </ul>
-
-                </div>
-            </div>
-            <div class="pt-8 border-t border-white/10">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-white/60 text-sm text-center md:text-left">
-                        &copy; 2025 มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน (THAIFA Foundation). สงวนลิขสิทธิ์.
-                    </p>
-                    <div class="flex flex-wrap justify-center gap-6 text-sm">
-                        <a href="#" class="text-white/60 hover:text-accent transition-colors">นโยบายความเป็นส่วนตัว</a>
-                        <a href="#" class="text-white/60 hover:text-accent transition-colors">ข้อกำหนดการใช้งาน</a>
-                        <a href="#" class="text-white/60 hover:text-accent transition-colors">รายงานประจำปี</a>
-                    </div>
-                </div>
-                <div class="mt-4 text-center">
-                    <p class="text-white/40 text-xs">
-                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน | เลขประจำตัวผู้เสียภาษีอากร: 0993000440226
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Floating Contact Button -->
-    <div class="fixed bottom-6 right-6 z-50">
-        <button onclick="toggleFloatingContact()" class="bg-primary hover:bg-primary/90 text-white rounded-full px-5 py-4 shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-            <span class="text-sm">ติดต่อเรา</span>
-        </button>
-    </div>
-
-    <!-- Contact Modal -->
-    <div id="contactModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onclick="if(event.target.id === 'contactModal') closeContactModal()">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl text-primary">ติดต่อเรา</h3>
-                <button onclick="closeContactModal()" class="text-foreground/40 hover:text-foreground/80 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <p class="text-foreground/70 mb-6">เลือกช่องทางที่คุณต้องการติดต่อ</p>
-            <div class="space-y-3">
-                <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">อีเมล</div>
-                        <div class="text-sm text-foreground/60">thaifafoundation@gmail.com</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.facebook.com/share/1FdXqqJNXE/" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #1877F2;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">Facebook</div>
-                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://line.me/R/ti/p/@519lkcsb" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #06C755;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">LINE</div>
-                        <div class="text-sm text-foreground/60">@519lkcsb</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.youtube.com/@THAIFAFoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #FF0000;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">YouTube</div>
-                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.tiktok.com/@thaifafoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #000000;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.10-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">TikTok</div>
-                        <div class="text-sm text-foreground/60">@thaifafoundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-            </div>
-            <div class="mt-6 pt-6 border-t border-border">
-                <p class="text-xs text-center text-foreground/50">เวลาทำการ: จันทร์-ศุกร์ 9:00-17:00 น.</p>
-            </div>
-        </div>
-    </div>
-
     <script>
-        function toggleFloatingContact() {
-            document.getElementById('contactModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if (!menu) return;
+            menu.classList.toggle('hidden');
         }
 
-        function closeContactModal() {
-            document.getElementById('contactModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeContactModal();
-        });
     </script>
-
+    <?php include __DIR__ . '/backend/helpers/floating_contact_widget.php'; ?>
 </body>
 </html>

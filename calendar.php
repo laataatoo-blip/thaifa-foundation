@@ -1,5 +1,74 @@
+<?php
+include_once(__DIR__ . '/backend/classes/CalendarManagement.class.php');
+include_once(__DIR__ . '/backend/helpers/i18n.php');
+thaifa_i18n_buffer_start();
+include_once(__DIR__ . '/backend/helpers/cart_count.php');
+$cartCount = thaifaCartCount();
+$calendar = new CalendarManagement();
+$isEn = thaifa_lang() === 'en';
+
+$calendarTypes = $calendar->getTypes(true);
+$calendarEvents = $calendar->eventsForJson();
+$upcomingEvents = $calendar->getUpcomingEvents(10);
+
+function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+function calendarTypeLabel($name)
+{
+    if (thaifa_lang() !== 'en') {
+        return (string)$name;
+    }
+    $map = [
+        'กิจกรรมทั่วไป' => 'General Event',
+        'ประชุม' => 'Meeting',
+        'ระดมทุน' => 'Fundraising',
+        'กิจกรรมชุมชน' => 'Community Activity',
+        'มอบทุนการศึกษา' => 'Scholarship Grant',
+    ];
+    $n = trim((string)$name);
+    return $map[$n] ?? $n;
+}
+function calendarTranslateEnText($text)
+{
+    $s = (string)$text;
+    if (thaifa_lang() !== 'en' || $s === '') {
+        return $s;
+    }
+    $map = [
+        'สำนักงานใหญ่ THAIFA Foundation' => 'THAIFA Foundation Headquarters',
+        'Scholarship Activitiesการศึกษา' => 'Scholarship activities',
+        'การศึกษา' => 'education',
+        'ประชุม' => 'Meeting',
+        'ระดมทุน' => 'Fundraising',
+        'กิจกรรมชุมชน' => 'Community Activity',
+        'มอบทุนการศึกษา' => 'Scholarship Grant',
+    ];
+    return strtr($s, $map);
+}
+if ($isEn) {
+    foreach ($calendarTypes as &$type) {
+        $type['name'] = calendarTypeLabel($type['name'] ?? '');
+    }
+    unset($type);
+    foreach ($upcomingEvents as &$event) {
+        $event['type_name'] = calendarTypeLabel($event['type_name'] ?? '');
+        $event['title'] = calendarTranslateEnText($event['title'] ?? '');
+        $event['summary'] = calendarTranslateEnText($event['summary'] ?? '');
+        $event['description'] = calendarTranslateEnText($event['description'] ?? '');
+        $event['location'] = calendarTranslateEnText($event['location'] ?? '');
+    }
+    unset($event);
+    foreach ($calendarEvents as &$event) {
+        $event['type_name'] = calendarTypeLabel($event['type_name'] ?? '');
+        $event['title'] = calendarTranslateEnText($event['title'] ?? '');
+        $event['summary'] = calendarTranslateEnText($event['summary'] ?? '');
+        $event['description'] = calendarTranslateEnText($event['description'] ?? '');
+        $event['location'] = calendarTranslateEnText($event['location'] ?? '');
+    }
+    unset($event);
+}
+?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= htmlspecialchars(thaifa_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,738 +76,501 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Prompt', sans-serif; border-color: #e2e8f0; }
-        body { background: #ffffff; color: #303a56; }
-        .view-btn.active { background: #233882; color: white; }
-        .event-scholarship { background: #233882; color: white; }
-        .event-activity { background: #e83b3b; color: white; }
+        * { font-family: 'Prompt', sans-serif; }
+        .view-btn.active {
+            background: #233882;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(35, 56, 130, 0.25);
+        }
+        .calendar-today {
+            background: #233882;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(35, 56, 130, 0.28);
+        }
+        .event-pill {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { primary: '#233882', accent: '#e83b3b', secondary: '#d9e7ef', foreground: '#303a56', border: '#e2e8f0' }}}
-        }
-    </script>
-</head>
-<body>
-
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-        <!-- Top Bar -->
-        <div class="bg-secondary/30 border-b border-border">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-10 text-sm">
-                    <!-- Contact Info -->
-                    <div class="hidden md:flex items-center gap-6 text-foreground/80">
-                        <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-2 hover:text-primary transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
-                            <span>thaifafoundation@gmail.com</span>
-                        </a>
-                    </div>
-
-                    <!-- Right Side -->
-                    <div class="flex items-center gap-4">
-                        <!-- Shopping Cart -->
-                        <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                            <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
-                        </a>
-
-                        <!-- Auth Buttons -->
-                        <div class="flex items-center gap-2 pl-4 border-l border-border">
-                            <a href="login.php" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                <span class="hidden sm:inline">เข้าสู่ระบบ</span>
-                            </a>
-                            <span class="text-foreground/40">/</span>
-                            <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
-                                <span class="hidden sm:inline">สมัครสมาชิก</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Main Navigation Bar -->
-        <div class="bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-20">
-                    <a href="index.php" class="flex-shrink-0">
-                        <img src="assets/images/Logo.png" 
-                            alt="THAIFA Logo" class="h-20 w-auto" />
-                    </a>
-                    <div class="hidden lg:flex items-center gap-1">
-                        <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
-                        <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
-                        <a href="calendar.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">ปฏิทิน</a>
-                        <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
-                        <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">การบริจาค</a>
-                        <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
-                        <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
-                        <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="pt-[120px]">
-        <!-- Hero Section -->
-        <section class="bg-gradient-to-br from-primary to-primary/80 text-white py-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center">
-                    <div class="inline-flex items-center gap-2 bg-white/20 rounded-full px-6 py-2 mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span>ปฏิทินกิจกรรม</span>
-                    </div>
-                    <h1 class="text-4xl md:text-5xl mb-4">กิจกรรมและโครงการ</h1>
-                    <p class="text-lg text-white/90 max-w-2xl mx-auto">
-                        ติดตามกิจกรรมและโครงการของมูลนิธิ ร่วมเป็นส่วนหนึ่งในการสร้างสังคมที่ดีขึ้น
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Calendar Section -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <iframe src="https://calendar.google.com/calendar/embed?src=8581e0fc31c85bc6a77b1b144c9d2c19c0bd905eb5d2e7a8c702b6e3009ccda8%40group.calendar.google.com&ctz=Asia%2FBangkok" style="border: 0" width="100%" height="800" frameborder="0" scrolling="no"></iframe>
-        </section>
-    </main>
-
-    <!-- Footer (compact) -->
-    <footer class="bg-primary text-white pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <!-- About -->
-                <div>
-                    <div class="mb-6">
-                        <img src="assets/images/Blue logo.png" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
-                    </div>
-                    <p class="text-white/80 text-sm leading-relaxed mb-4">
-                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน มุ่งมั่นสร้างโอกาสและพัฒนาคุณภาพชีวิตของเด็กและเยาวชนไทย
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
-                        <span class="text-white/90 text-sm">ขอบคุณที่ร่วมเคียงฝันไปด้วยกัน</span>
-                    </div>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h3 class="mb-6 text-xl">เมนูหลัก</h3>
-                    <ul class="space-y-3">
-                        <li><a href="index.php" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
-                        <li><a href="about.php" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
-                        <li><a href="donate.php" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
-                        <li><a href="volunteer.php" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
-                        <li><a href="stories.php" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
-                        <li><a href="contact.php" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
-                    </ul>
-                </div>
-
-                <!-- Programs -->
-                <div>
-                    <h3 class="mb-6 text-xl">โครงการของเรา</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">ทุนการศึกษา</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">ช่วยเหลือเด็กกำพร้า</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">เครื่องมือแพทย์</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">กิจกรรมชุมชน</a></li>
-                        <li><a href="#" class="text-white/80 hover:text-accent transition-colors">เสียงจากใจผู้รับ</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contact Info -->
-                <div>
-                    <h3 class="mb-6 text-xl">ติดต่อเรา</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span class="text-white/80 text-sm">
-                                อาคาร จูเวลเลอรี่ ห้อง 138/32 ชั้น 12<br />
-                                เลขที่ 138 ถนนนเรศ แขวงสี่พระยา<br />
-                                เขตบางรัก กรุงเทพฯ 10500
-                            </span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <svg class="w-5 h-5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <span class="text-white/80 text-sm">thaifafoundation@gmail.com</span>
-                        </li>
-                    </ul>
-
-                </div>
-            </div>
-
-            <!-- Bottom Bar -->
-            <div class="pt-8 border-t border-white/10">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-white/60 text-sm text-center md:text-left">
-                        &copy; 2025 มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน (THAIFA Foundation). สงวนลิขสิทธิ์.
-                    </p>
-                    <div class="flex flex-wrap justify-center gap-6 text-sm">
-                        <a href="#" class="text-white/60 hover:text-accent transition-colors">นโยบายความเป็นส่วนตัว</a>
-                        <a href="#" class="text-white/60 hover:text-accent transition-colors">ข้อกำหนดการใช้งาน</a>
-                        <a href="#" class="text-white/60 hover:text-accent transition-colors">รายงานประจำปี</a>
-                    </div>
-                </div>
-                <div class="mt-4 text-center">
-                    <p class="text-white/40 text-xs">
-                        มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน | เลขประจำตัวผู้เสียภาษีอากร: 0993000440226
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        let currentDate = new Date(2025, 10, 1); // November 2025
-        let currentView = 'month';
-        let selectedDate = null;
-
-        // Event database with different events for different dates
-        const eventsDatabase = {
-            '2025-11-20': [
-                {
-                    title: 'มอบทุนการศึกษาภาคตะวันออกเฉียงเหนือ',
-                    type: 'scholarship',
-                    time: '09:00 - 12:00 น.',
-                    location: 'โรงเรียนบ้านหนองแวง จ.ขอนแก่น',
-                    description: 'มอบทุนการศึกษาให้กับนักเรียนที่ขาดแคลน จำนวน 50 ทุน'
-                }
-            ],
-            '2025-11-15': [
-                {
-                    title: 'จัดหาอุปกรณ์การศึกษา',
-                    type: 'scholarship',
-                    time: '10:00 - 15:00 น.',
-                    location: 'โรงเรียนบ้านหนองหญ้าปล้อง จ.อุบลราชธานี',
-                    description: 'มอบอุปกรณ์การเรียนและเครื่องแบบนักเรียน'
-                }
-            ],
-            '2025-11-25': [
-                {
-                    title: 'กิจกรรมเยี่ยมบ้านนักเรียน',
-                    type: 'activity',
-                    time: '08:00 - 17:00 น.',
-                    location: 'จ.นครราชสีมา',
-                    description: 'ติดตามผลการใช้ทุนและสภาพความเป็นอยู่'
-                }
-            ],
-            '2025-12-05': [
-                {
-                    title: 'วันคล้ายวันสถาปนามูลนิธิ',
-                    type: 'meeting',
-                    time: '09:00 - 16:00 น.',
-                    location: 'ที่ทำการมูลนิธิ กรุงเทพฯ',
-                    description: 'จัดงานฉลองครบรอบและมอบรางวัล'
-                }
-            ],
-            '2025-12-15': [
-                {
-                    title: 'ประชุมคณะกรรมการมูลนิธิ',
-                    type: 'meeting',
-                    time: '14:00 - 17:00 น.',
-                    location: 'ที่ทำการมูลนิธิ กรุงเทพฯ',
-                    description: 'ประชุมคณะกรรมการประจำไตรมาส'
-                }
-            ],
-            '2025-12-22': [
-                {
-                    title: 'มอบทุนการศึกษาภาคใต้',
-                    type: 'scholarship',
-                    time: '10:00 - 14:00 น.',
-                    location: 'โรงเรียนวัดไทรใหญ่ จ.ภูเก็ต',
-                    description: 'มอบทุนการศึกษา 35 ทุน'
-                }
-            ],
-            '2026-01-11': [
-                {
-                    title: 'กิจกรรมวันเด็กแห่งชาติ',
-                    type: 'activity',
-                    time: '08:00 - 16:00 น.',
-                    location: 'ศูนย์เยาวชนกรุงเทพมหานคร',
-                    description: 'จัดกิจกรรมวันเด็ก มอบของขวัญและทุนการศึกษา'
-                }
-            ],
-            '2026-01-18': [
-                {
-                    title: 'การระดมทุนการกุศล',
-                    type: 'fundraising',
-                    time: '18:00 - 22:00 น.',
-                    location: 'โรงแรมแกรนด์ ไฮแอท กรุงเทพฯ',
-                    description: 'งานเลี้ยงการกุศลระดมทุนสนับสนุนโครงการ'
-                }
-            ]
-        };
-
-        function getEventTypeClass(type) {
-            const classes = {
-                'scholarship': 'event-scholarship',
-                'activity': 'event-activity',
-                'meeting': 'bg-blue-500 text-white',
-                'fundraising': 'bg-green-500 text-white'
-            };
-            return classes[type] || 'bg-gray-500 text-white';
-        }
-
-        function getEventTypeLabel(type) {
-            const labels = {
-                'scholarship': 'มอบทุนการศึกษา',
-                'activity': 'กิจกรรมชุมชน',
-                'meeting': 'ประชุม',
-                'fundraising': 'ระดมทุน'
-            };
-            return labels[type] || 'อื่นๆ';
-        }
-
-        function getEventsForDate(date) {
-            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-            return eventsDatabase[key] || [];
-        }
-
-        function getAllUpcomingEvents() {
-            const today = new Date();
-            const events = [];
-            
-            Object.keys(eventsDatabase).sort().forEach(dateKey => {
-                const [year, month, day] = dateKey.split('-').map(Number);
-                const eventDate = new Date(year, month - 1, day);
-                
-                if (eventDate >= today) {
-                    eventsDatabase[dateKey].forEach(event => {
-                        events.push({
-                            ...event,
-                            date: eventDate,
-                            dateKey: dateKey
-                        });
-                    });
-                }
-            });
-            
-            return events;
-        }
-
-        function goToToday() {
-            currentDate = new Date();
-            renderCalendar();
-        }
-
-        function goPrev() {
-            if (currentView === 'month') {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar();
-            } else if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() - 7);
-                renderWeekView();
-            } else if (currentView === 'day') {
-                currentDate.setDate(currentDate.getDate() - 1);
-                renderDayView();
-            }
-            if (currentView === 'agenda') {
-                updateAgendaView();
-            }
-        }
-
-        function goNext() {
-            if (currentView === 'month') {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar();
-            } else if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() + 7);
-                renderWeekView();
-            } else if (currentView === 'day') {
-                currentDate.setDate(currentDate.getDate() + 1);
-                renderDayView();
-            }
-            if (currentView === 'agenda') {
-                updateAgendaView();
-            }
-        }
-
-        function changeView(view) {
-            currentView = view;
-            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('view-' + view).classList.add('active');
-            
-            if (view === 'month') {
-                document.getElementById('month-view').classList.remove('hidden');
-                document.getElementById('agenda-view').classList.add('hidden');
-                renderCalendar();
-            } else if (view === 'week') {
-                document.getElementById('month-view').classList.remove('hidden');
-                document.getElementById('agenda-view').classList.add('hidden');
-                renderWeekView();
-            } else if (view === 'day') {
-                document.getElementById('month-view').classList.remove('hidden');
-                document.getElementById('agenda-view').classList.add('hidden');
-                renderDayView();
-            } else {
-                document.getElementById('month-view').classList.add('hidden');
-                document.getElementById('agenda-view').classList.remove('hidden');
-                updateAgendaView();
-            }
-        }
-
-        function updateAgendaView() {
-            const agendaView = document.getElementById('agenda-view');
-            const events = getAllUpcomingEvents();
-            
-            if (events.length === 0) {
-                agendaView.innerHTML = '<div class="p-8 text-center text-foreground/60">ไม่มีกิจกรรมที่กำลังจะมาถึง</div>';
-                return;
-            }
-            
-            const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-            const dayNames = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
-            
-            let html = '<div class="max-h-[700px] overflow-y-auto">';
-            
-            events.forEach((event, index) => {
-                const date = event.date;
-                html += `
-                    <div class="p-4 border-b border-border hover:bg-gray-50 transition-colors cursor-pointer">
-                        <div class="flex items-start gap-4">
-                            <div class="text-center min-w-[60px]">
-                                <div class="text-sm text-foreground/60">${monthNames[date.getMonth()]}</div>
-                                <div class="text-2xl">${date.getDate()}</div>
-                                <div class="text-xs text-foreground/60">${dayNames[date.getDay()]}</div>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-start justify-between mb-2">
-                                    <h3 class="text-primary">${event.title}</h3>
-                                    <span class="${getEventTypeClass(event.type)} text-xs px-3 py-1 rounded-full">${getEventTypeLabel(event.type)}</span>
-                                </div>
-                                <p class="text-sm text-foreground/70 mb-2">${event.description}</p>
-                                <div class="flex flex-wrap gap-4 text-sm text-foreground/60">
-                                    <div class="flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        ${event.time}
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        ${event.location}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            agendaView.innerHTML = html;
-        }
-
-        function renderWeekView() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            
-            // Calculate week start (Sunday) and end (Saturday)
-            const weekStart = new Date(currentDate);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-            
-            // Update date display
-            const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-            document.getElementById('date-display').textContent = 
-                `${weekStart.getDate()} - ${weekEnd.getDate()} ${monthNames[month]} ${year + 543}`;
-            
-            const today = new Date();
-            
-            let html = '';
-            
-            // Render 7 days of the week
-            for (let i = 0; i < 7; i++) {
-                const cellDate = new Date(weekStart);
-                cellDate.setDate(cellDate.getDate() + i);
-                
-                const isToday = (
-                    cellDate.getDate() === today.getDate() &&
-                    cellDate.getMonth() === today.getMonth() &&
-                    cellDate.getFullYear() === today.getFullYear()
-                );
-                
-                const events = getEventsForDate(cellDate);
-                const hasEvent = events.length > 0;
-                
-                html += `<div class="min-h-[300px] border-r border-b border-border p-3 hover:bg-gray-50 transition-colors cursor-pointer ${isToday ? 'bg-blue-50/50' : ''}" onclick="selectDate(${cellDate.getFullYear()}, ${cellDate.getMonth()}, ${cellDate.getDate()})">`;
-                html += `<div class="text-center mb-3">`;
-                html += `<div class="text-xs text-foreground/60 mb-1">${['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'][cellDate.getDay()]}</div>`;
-                html += `<span class="${isToday ? 'bg-primary text-white rounded-full w-8 h-8 inline-flex items-center justify-center' : 'text-foreground/90 font-medium'}">${cellDate.getDate()}</span>`;
-                html += `</div>`;
-                
-                if (hasEvent) {
-                    html += '<div class="space-y-2">';
-                    events.forEach(event => {
-                        html += `<div class="text-xs p-2 rounded cursor-pointer hover:opacity-80 transition-opacity ${getEventTypeClass(event.type)}">`;
-                        html += `<div class="font-medium mb-1">${event.title}</div>`;
-                        html += `<div class="text-xs opacity-90">${event.time}</div>`;
-                        html += `</div>`;
-                    });
-                    html += '</div>';
-                }
-                
-                html += '</div>';
-            }
-            
-            document.getElementById('calendar-grid').innerHTML = html;
-        }
-
-        function renderDayView() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const day = currentDate.getDate();
-            
-            // Update date display
-            const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-            const dayNames = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
-            document.getElementById('date-display').textContent = 
-                `${dayNames[currentDate.getDay()]} ${day} ${monthNames[month]} ${year + 543}`;
-            
-            const cellDate = new Date(year, month, day);
-            const today = new Date();
-            const isToday = (
-                cellDate.getDate() === today.getDate() &&
-                cellDate.getMonth() === today.getMonth() &&
-                cellDate.getFullYear() === today.getFullYear()
-            );
-            
-            const events = getEventsForDate(cellDate);
-            
-            let html = `<div class="col-span-7 p-6 border border-border min-h-[500px] ${isToday ? 'bg-blue-50/50' : ''}">`;
-            html += `<div class="text-center mb-6">`;
-            html += `<div class="text-4xl mb-2 ${isToday ? 'text-primary' : 'text-foreground/90'}">${day}</div>`;
-            html += `<div class="text-lg text-foreground/70">${dayNames[cellDate.getDay()]}</div>`;
-            html += `<div class="text-sm text-foreground/60">${monthNames[month]} ${year + 543}</div>`;
-            html += `</div>`;
-            
-            if (events.length > 0) {
-                html += '<div class="max-w-2xl mx-auto space-y-4">';
-                events.forEach(event => {
-                    html += `<div class="p-4 rounded-xl ${getEventTypeClass(event.type)}">`;
-                    html += `<div class="flex items-start justify-between mb-3">`;
-                    html += `<h3 class="text-xl font-medium">${event.title}</h3>`;
-                    html += `<span class="text-xs px-3 py-1 bg-white/20 rounded-full">${getEventTypeLabel(event.type)}</span>`;
-                    html += `</div>`;
-                    html += `<p class="mb-3 opacity-90">${event.description}</p>`;
-                    html += `<div class="space-y-2 opacity-90">`;
-                    html += `<div class="flex items-center gap-2">`;
-                    html += `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
-                    html += `<span>${event.time}</span>`;
-                    html += `</div>`;
-                    html += `<div class="flex items-center gap-2">`;
-                    html += `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`;
-                    html += `<span>${event.location}</span>`;
-                    html += `</div>`;
-                    html += `</div>`;
-                    html += `</div>`;
-                });
-                html += '</div>';
-            } else {
-                html += '<div class="text-center text-foreground/60 py-12">';
-                html += '<svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
-                html += '<p class="text-lg">ไม่มีกิจกรรมในวันนี้</p>';
-                html += '</div>';
-            }
-            
-            html += '</div>';
-            
-            document.getElementById('calendar-grid').innerHTML = html;
-        }
-
-        function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            
-            // Update date display
-            const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-            
-            if (currentView === 'month') {
-                document.getElementById('date-display').textContent = monthNames[month] + ' ' + (year + 543);
-            }
-            
-            // Generate calendar grid
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const daysInMonth = lastDay.getDate();
-            const startingDayOfWeek = firstDay.getDay();
-            
-            const today = new Date();
-            
-            let html = '';
-            let dayCounter = 1;
-            
-            // 6 weeks max
-            for (let week = 0; week < 6; week++) {
-                for (let day = 0; day < 7; day++) {
-                    const cellIndex = week * 7 + day;
-                    
-                    if (cellIndex < startingDayOfWeek || dayCounter > daysInMonth) {
-                        html += '<div class="min-h-[120px] border-r border-b border-border bg-gray-50/50"></div>';
-                    } else {
-                        const cellDate = new Date(year, month, dayCounter);
-                        const isToday = (
-                            cellDate.getDate() === today.getDate() &&
-                            cellDate.getMonth() === today.getMonth() &&
-                            cellDate.getFullYear() === today.getFullYear()
-                        );
-                        const events = getEventsForDate(cellDate);
-                        const hasEvent = events.length > 0;
-                        
-                        html += `<div class="min-h-[120px] border-r border-b border-border p-2 hover:bg-gray-50 transition-colors cursor-pointer ${isToday ? 'bg-blue-50/50' : ''}" onclick="selectDate(${year}, ${month}, ${dayCounter})">`;
-                        html += `<div class="text-sm mb-2 ${isToday ? 'flex items-center justify-center' : ''}">`;
-                        html += `<span class="${isToday ? 'bg-primary text-white rounded-full w-7 h-7 flex items-center justify-center' : 'text-foreground/70'}">${dayCounter}</span>`;
-                        html += `</div>`;
-                        
-                        if (hasEvent) {
-                            html += '<div class="space-y-1">';
-                            events.forEach(event => {
-                                html += `<div class="text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity ${getEventTypeClass(event.type)}"><div class="truncate">${event.title}</div></div>`;
-                            });
-                            html += '</div>';
-                        }
-                        
-                        html += '</div>';
-                        dayCounter++;
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#233882',
+                        secondary: '#edf3f8',
+                        surface: '#f5f7fb',
+                        border: '#dbe3ef',
+                        foreground: '#303a56'
                     }
                 }
             }
-            
-            document.getElementById('calendar-grid').innerHTML = html;
         }
-
-        function selectDate(year, month, day) {
-            selectedDate = new Date(year, month, day);
-            currentDate = new Date(year, month, day);
-            
-            // Show events for this day in an alert (you can customize this)
-            const events = getEventsForDate(selectedDate);
-            
-            if (events.length > 0) {
-                let message = `กิจกรรมวันที่ ${day}:\n\n`;
-                events.forEach(event => {
-                    message += `${event.title}\n${event.time}\n${event.location}\n\n`;
-                });
-                alert(message);
-            } else {
-                alert(`ไม่มีกิจกรรมในวันที่ ${day}`);
-            }
-        }
-
-        // Initialize
-        renderCalendar();
-
-        function toggleFloatingContact() {
-            document.getElementById('contactModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeContactModal() {
-            document.getElementById('contactModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeContactModal();
-        });
     </script>
+</head>
+<body class="bg-surface text-foreground">
 
-    <!-- Contact Modal -->
-    <div id="contactModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onclick="if(event.target.id === 'contactModal') closeContactModal()">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl text-primary">ติดต่อเรา</h3>
-                <button onclick="closeContactModal()" class="text-foreground/40 hover:text-foreground/80 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+    <div class="bg-secondary/30 border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-10 text-sm">
+                <a href="mailto:thaifafoundation@gmail.com" class="hidden md:flex items-center gap-2 text-foreground/80 hover:text-primary transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
-                </button>
-            </div>
-            <p class="text-foreground/70 mb-6">เลือกช่องทางที่คุณต้องการติดต่อ</p>
-            <div class="space-y-3">
-                <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">อีเมล</div>
-                        <div class="text-sm text-foreground/60">thaifafoundation@gmail.com</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    <span>thaifafoundation@gmail.com</span>
                 </a>
-                <a href="https://www.facebook.com/share/1FdXqqJNXE/" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #1877F2;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                <div class="flex items-center gap-4">
+                    <a href="cart.php" class="relative text-foreground/80 hover:text-primary transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
+                        <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?= (int)$cartCount ?></span>
+                    </a>
+                    <div class="flex items-center gap-1"><a href="<?= h(thaifa_lang_url('th')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='th' ? 'bg-primary text-white' : 'text-foreground/70 hover:text-primary' ?>">TH</a><a href="<?= h(thaifa_lang_url('en')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='en' ? 'bg-primary text-white' : 'text-foreground/70 hover:text-primary' ?>">EN</a></div><div class="flex items-center gap-2 pl-4 border-l border-border">
+                        <a href="login.php" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span class="hidden sm:inline"><?= h(thaifa_t('login')) ?></span>
+                        </a>
+                        <span class="text-foreground/40">/</span>
+                        <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
+                            <span class="hidden sm:inline"><?= h(thaifa_t('register')) ?></span>
+                        </a>
                     </div>
-                    <div class="flex-1">
-                        <div class="text-primary">Facebook</div>
-                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://line.me/ti/p/~@thaifa" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #06C755;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">LINE</div>
-                        <div class="text-sm text-foreground/60">@thaifa</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.youtube.com/@THAIFAFoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #FF0000;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">YouTube</div>
-                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.tiktok.com/@thaifafoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #000000;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.10-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">TikTok</div>
-                        <div class="text-sm text-foreground/60">@thaifafoundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-            </div>
-            <div class="mt-6 pt-6 border-t border-border">
-                <p class="text-xs text-center text-foreground/50">เวลาทำการ: จันทร์-ศุกร์ 9:00-17:00 น.</p>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.php" class="flex-shrink-0">
+                    <img src="assets/images/Logo.png" alt="THAIFA Logo" class="h-20 w-auto"/>
+                </a>
+                <div class="hidden lg:flex items-center gap-1">
+                    <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('home')) ?></a>
+                    <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('about')) ?></a>
+                    <a href="calendar.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md"><?= h(thaifa_t('calendar')) ?></a>
+                    <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('shop')) ?></a>
+                    <a href="donate.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('donate')) ?></a>
+                    <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('volunteer')) ?></a>
+                    <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('stories')) ?></a>
+                    <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('contact')) ?></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-[120px] pb-12">
+    <section class="bg-gradient-to-br from-primary to-[#4b61a6] text-white py-10 md:py-14">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-flex items-center gap-2 bg-white/20 rounded-full px-5 py-2 mb-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span><?= h(thaifa_t('calendar_badge')) ?></span>
+            </div>
+            <h1 class="text-4xl md:text-6xl text-white mb-3"><?= h(thaifa_t('calendar_title')) ?></h1>
+            <p class="text-lg md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed">
+                <?= h(thaifa_t('calendar_subtitle')) ?>
+            </p>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white border border-border rounded-2xl p-3 md:p-4 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between shadow-sm">
+            <div class="flex items-center gap-2 md:gap-3">
+                <button id="btnToday" class="px-4 py-2 rounded-xl border border-border bg-surface text-sm hover:bg-secondary"><?= $isEn ? 'Today' : 'วันนี้' ?></button>
+                <button id="btnPrev" class="w-9 h-9 rounded-xl border border-border bg-white hover:bg-secondary flex items-center justify-center" aria-label="<?= $isEn ? 'Previous' : 'ก่อนหน้า' ?>">‹</button>
+                <button id="btnNext" class="w-9 h-9 rounded-xl border border-border bg-white hover:bg-secondary flex items-center justify-center" aria-label="<?= $isEn ? 'Next' : 'ถัดไป' ?>">›</button>
+                <div id="currentLabel" class="ml-1 text-2xl text-primary"></div>
+            </div>
+            <div class="inline-flex bg-surface border border-border rounded-2xl p-1.5 gap-1">
+                <button class="view-btn active px-3 py-1.5 rounded-xl text-sm" data-view="month"><?= $isEn ? 'Month' : 'เดือน' ?></button>
+                <button class="view-btn px-3 py-1.5 rounded-xl text-sm" data-view="week"><?= $isEn ? 'Week' : 'สัปดาห์' ?></button>
+                <button class="view-btn px-3 py-1.5 rounded-xl text-sm" data-view="day"><?= $isEn ? 'Day' : 'วัน' ?></button>
+                <button class="view-btn px-3 py-1.5 rounded-xl text-sm" data-view="list"><?= $isEn ? 'Agenda' : 'กำหนดการ' ?></button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
+            <div class="lg:col-span-8">
+                <div class="bg-white border border-border rounded-2xl overflow-hidden shadow-sm">
+                    <div id="calendarView" class="min-h-[640px]"></div>
+                </div>
+            </div>
+
+            <aside class="lg:col-span-4 space-y-4">
+                <div class="bg-white border border-border rounded-2xl p-5 shadow-sm">
+                    <h3 class="text-lg text-primary mb-3"><?= $isEn ? 'Event Categories' : 'ประเภทกิจกรรม' ?></h3>
+                    <ul class="space-y-2">
+                        <?php foreach ($calendarTypes as $type): ?>
+                            <li class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full" style="background: <?= h($type['color_hex']) ?>;"></span>
+                                <span class="text-foreground/90"><?= h(calendarTypeLabel($type['name'])) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+
+                <div class="bg-white border border-border rounded-2xl p-5 shadow-sm">
+                    <h3 class="text-lg text-primary mb-3"><?= $isEn ? 'Upcoming Events' : 'กิจกรรมที่กำลังจะมาถึง' ?></h3>
+                    <div id="upcomingList" class="space-y-3">
+                        <?php if (empty($upcomingEvents)): ?>
+                            <div class="text-sm text-foreground/60"><?= $isEn ? 'No upcoming events yet' : 'ยังไม่มีกิจกรรมที่กำลังจะมาถึง' ?></div>
+                        <?php else: ?>
+                            <?php foreach ($upcomingEvents as $u): ?>
+                                <div class="rounded-xl border border-border p-3">
+                                    <div class="text-sm text-foreground/60 mb-1"><?= h(date('d/m/Y H:i', strtotime($u['start_at']))) ?></div>
+                                    <div class="text-primary font-medium leading-snug"><?= h($u['title']) ?></div>
+                                    <div class="text-xs mt-2 inline-flex items-center gap-2 px-2 py-1 rounded-full" style="background: <?= h($u['color_hex'] ?: '#233882') ?>20; color: <?= h($u['color_hex'] ?: '#233882') ?>;">
+                                        <span class="w-2 h-2 rounded-full" style="background: <?= h($u['color_hex'] ?: '#233882') ?>;"></span>
+                                        <?= h(calendarTypeLabel($u['type_name'] ?: ($isEn ? 'General Event' : 'กิจกรรมทั่วไป'))) ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+</main>
+
+<footer class="bg-primary text-white pt-14 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+            <div>
+                <img src="assets/images/Logo.png" alt="THAIFA Foundation" class="h-14 w-auto mb-4 bg-white rounded-md p-1" />
+                <p class="text-white/80 text-sm">มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน มุ่งมั่นสร้างโอกาสและพัฒนาคุณภาพชีวิตของเด็กและเยาวชนไทย</p>
+            </div>
+            <div>
+                <h3 class="mb-4 text-xl">เมนูหลัก</h3>
+                <ul class="space-y-2 text-sm text-white/80">
+                    <li><a href="index.php" class="hover:text-white"><?= h(thaifa_t('home')) ?></a></li>
+                    <li><a href="about.php" class="hover:text-white"><?= h(thaifa_t('about')) ?></a></li>
+                    <li><a href="shop.php" class="hover:text-white"><?= h(thaifa_t('shop')) ?></a></li>
+                    <li><a href="donate.php" class="hover:text-white"><?= h(thaifa_t('donate')) ?></a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="mb-4 text-xl">โครงการของเรา</h3>
+                <ul class="space-y-2 text-sm text-white/80">
+                    <li>ทุนการศึกษา</li>
+                    <li>ช่วยเหลือเด็กกำพร้า</li>
+                    <li>เครื่องมือแพทย์</li>
+                    <li>กิจกรรมชุมชน</li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="mb-4 text-xl"><?= h(thaifa_t('contact')) ?></h3>
+                <p class="text-sm text-white/80">อาคาร จูเวลเลอรี่ ห้อง 138/32 ชั้น 12 เลขที่ 138 ถนนนเรศ แขวงสี่พระยา เขตบางรัก กรุงเทพฯ 10500</p>
+                <p class="text-sm text-white/80 mt-3">thaifafoundation@gmail.com</p>
+            </div>
+        </div>
+        <div class="border-t border-white/15 pt-6 text-sm text-white/70">
+            &copy; 2025 มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน (THAIFA Foundation). สงวนลิขสิทธิ์.
+        </div>
+    </div>
+</footer>
+
+<script>
+const calendarEvents = <?= json_encode($calendarEvents, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const isEn = <?= $isEn ? 'true' : 'false' ?>;
+const t = {
+    agenda: <?= json_encode($isEn ? 'Agenda' : 'กำหนดการกิจกรรม', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+    itemCount: <?= json_encode($isEn ? 'items' : 'รายการ', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+    allDay: <?= json_encode($isEn ? 'All day' : 'ทั้งวัน', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+    noEventsToday: <?= json_encode($isEn ? 'No events today.' : 'ไม่มีกิจกรรมในวันนี้', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+    noSchedules: <?= json_encode($isEn ? 'No schedule available yet.' : 'ยังไม่มีกำหนดการกิจกรรม', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+    generalEvent: <?= json_encode($isEn ? 'General Event' : 'กิจกรรมทั่วไป', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+};
+function typeLabel(name) {
+    const n = (name || '').trim();
+    return n || t.generalEvent;
+}
+const months = <?= json_encode($isEn ? ['January','February','March','April','May','June','July','August','September','October','November','December'] : ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const shortMonths = <?= json_encode($isEn ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] : ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const days = <?= json_encode($isEn ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : ['อา','จ','อ','พ','พฤ','ศ','ส'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+
+let currentDate = new Date();
+let currentView = 'month';
+
+function toDateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function parseEventDate(dateString) {
+    const s = (dateString || '').replace(' ', 'T');
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function eventByDate() {
+    const map = {};
+    calendarEvents.forEach(ev => {
+        const d = parseEventDate(ev.start_at);
+        if (!d) return;
+        const key = toDateKey(d);
+        if (!map[key]) map[key] = [];
+        map[key].push(ev);
+    });
+    return map;
+}
+
+function updateHeaderLabel() {
+    const el = document.getElementById('currentLabel');
+    if (currentView === 'month') {
+        el.textContent = isEn
+            ? `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`
+            : `${months[currentDate.getMonth()]} ${currentDate.getFullYear() + 543}`;
+        return;
+    }
+    if (currentView === 'week') {
+        const start = getWeekStart(new Date(currentDate));
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        el.textContent = isEn
+            ? `${start.getDate()} ${shortMonths[start.getMonth()]} - ${end.getDate()} ${shortMonths[end.getMonth()]} ${end.getFullYear()}`
+            : `${start.getDate()} ${shortMonths[start.getMonth()]} - ${end.getDate()} ${shortMonths[end.getMonth()]} ${end.getFullYear() + 543}`;
+        return;
+    }
+    if (currentView === 'day') {
+        el.textContent = isEn
+            ? `${days[currentDate.getDay()]} ${currentDate.getDate()} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`
+            : `${days[currentDate.getDay()]} ${currentDate.getDate()} ${months[currentDate.getMonth()]} ${currentDate.getFullYear() + 543}`;
+        return;
+    }
+    el.textContent = t.agenda;
+}
+
+function getWeekStart(date) {
+    const d = new Date(date);
+    d.setDate(d.getDate() - d.getDay());
+    d.setHours(0,0,0,0);
+    return d;
+}
+
+function renderMonthView() {
+    const view = document.getElementById('calendarView');
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDay = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+    const todayKey = toDateKey(new Date());
+    const map = eventByDate();
+
+    let html = '<div class="grid grid-cols-7 border-b border-border bg-[#f8fbff]">';
+    days.forEach(d => html += `<div class="py-3 text-center text-foreground/70 text-sm">${d}</div>`);
+    html += '</div>';
+
+    html += '<div class="grid grid-cols-7">';
+    let dayNum = 1;
+    for (let i = 0; i < 42; i++) {
+        if (i < startDay || dayNum > daysInMonth) {
+            html += '<div class="min-h-[104px] border-r border-b border-border bg-surface/50"></div>';
+            continue;
+        }
+
+        const d = new Date(year, month, dayNum);
+        const key = toDateKey(d);
+        const events = map[key] || [];
+        const isToday = key === todayKey;
+
+        html += '<div class="min-h-[104px] border-r border-b border-border p-2.5 bg-white hover:bg-[#f8fbff] transition-colors">';
+        html += `<div class="mb-2 text-sm ${isToday ? 'calendar-today w-8 h-8 rounded-full flex items-center justify-center' : 'text-foreground/80'}">${dayNum}</div>`;
+
+        if (events.length) {
+            const shortEvents = events.slice(0, 2);
+            shortEvents.forEach(ev => {
+                const color = ev.color_hex || '#233882';
+                html += `<div class="event-pill text-xs px-2 py-1 rounded-md mb-1" style="background:${color}1f;color:${color};">${ev.title}</div>`;
+            });
+            if (events.length > 2) {
+                html += `<div class="text-xs text-foreground/60">+${events.length - 2} ${t.itemCount}</div>`;
+            }
+        }
+
+        html += '</div>';
+        dayNum++;
+    }
+    html += '</div>';
+    view.innerHTML = html;
+}
+
+function renderWeekView() {
+    const view = document.getElementById('calendarView');
+    const map = eventByDate();
+    const start = getWeekStart(currentDate);
+    const todayKey = toDateKey(new Date());
+
+    let html = '<div class="grid grid-cols-7 border-b border-border bg-[#f8fbff]">';
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        html += `<div class="p-3 text-center text-sm"><div class="text-foreground/70">${days[d.getDay()]}</div><div class="text-foreground">${d.getDate()}</div></div>`;
+    }
+    html += '</div><div class="grid grid-cols-7">';
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        const key = toDateKey(d);
+        const events = map[key] || [];
+        const todayClass = key === todayKey ? 'bg-[#f3f8ff]' : 'bg-white';
+
+        html += `<div class="min-h-[560px] border-r border-b border-border p-2 ${todayClass}">`;
+        if (events.length === 0) {
+            html += '<div class="text-xs text-foreground/40 px-1">-</div>';
+        } else {
+            events.forEach(ev => {
+                const color = ev.color_hex || '#233882';
+                const dt = parseEventDate(ev.start_at);
+                const time = ev.is_all_day ? t.allDay : (dt ? `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '');
+                html += `<div class="rounded-lg p-2 mb-2 text-xs" style="background:${color}20;border-left:3px solid ${color}">
+                    <div class="font-medium" style="color:${color}">${ev.title}</div>
+                    <div class="text-foreground/70 mt-1">${time}</div>
+                </div>`;
+            });
+        }
+        html += '</div>';
+    }
+
+    html += '</div>';
+    view.innerHTML = html;
+}
+
+function renderDayView() {
+    const view = document.getElementById('calendarView');
+    const key = toDateKey(currentDate);
+    const map = eventByDate();
+    const events = map[key] || [];
+
+    let html = '<div class="p-5">';
+    html += `<div class="text-2xl text-primary mb-4">${days[currentDate.getDay()]} ${currentDate.getDate()} ${months[currentDate.getMonth()]} ${isEn ? currentDate.getFullYear() : currentDate.getFullYear() + 543}</div>`;
+
+    if (!events.length) {
+        html += `<div class="rounded-xl border border-border p-6 text-foreground/60 text-center">${t.noEventsToday}</div>`;
+    } else {
+        html += '<div class="space-y-3">';
+        events.forEach(ev => {
+            const color = ev.color_hex || '#233882';
+            const s = parseEventDate(ev.start_at);
+            const e = parseEventDate(ev.end_at);
+            const range = ev.is_all_day ? t.allDay : `${s ? `${String(s.getHours()).padStart(2,'0')}:${String(s.getMinutes()).padStart(2,'0')}` : ''}${e ? ` - ${String(e.getHours()).padStart(2,'0')}:${String(e.getMinutes()).padStart(2,'0')}` : ''}`;
+
+            html += `<div class="rounded-xl border border-border p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-lg text-primary">${ev.title}</div>
+                        <div class="text-sm text-foreground/70 mt-1">${ev.summary || ''}</div>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded-full" style="background:${color}20;color:${color}">${typeLabel(ev.type_name || t.generalEvent)}</span>
+                </div>
+                <div class="text-sm text-foreground/80 mt-3">🕒 ${range}</div>
+                ${ev.location ? `<div class="text-sm text-foreground/80 mt-1">📍 ${ev.location}</div>` : ''}
+                ${ev.description ? `<div class="text-sm text-foreground/70 mt-2">${ev.description}</div>` : ''}
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    html += '</div>';
+    view.innerHTML = html;
+}
+
+function renderListView() {
+    const view = document.getElementById('calendarView');
+    const now = new Date();
+    const events = [...calendarEvents]
+        .map(ev => ({...ev, _start: parseEventDate(ev.start_at)}))
+        .filter(ev => ev._start)
+        .sort((a, b) => a._start - b._start)
+        .filter(ev => ev._start >= new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+
+    let html = '<div class="p-5">';
+
+    if (!events.length) {
+        html += `<div class="rounded-xl border border-border p-6 text-foreground/60 text-center">${t.noSchedules}</div>`;
+    } else {
+        html += '<div class="space-y-3">';
+        events.forEach(ev => {
+            const color = ev.color_hex || '#233882';
+            const d = ev._start;
+            html += `<div class="rounded-xl border border-border p-4">
+                <div class="flex items-start gap-4">
+                    <div class="w-14 text-center">
+                        <div class="text-xs text-foreground/60">${shortMonths[d.getMonth()]}</div>
+                        <div class="text-2xl text-primary">${d.getDate()}</div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="text-primary text-lg leading-snug">${ev.title}</div>
+                            <span class="text-xs px-2 py-1 rounded-full" style="background:${color}20;color:${color}">${typeLabel(ev.type_name || t.generalEvent)}</span>
+                        </div>
+                        <div class="text-sm text-foreground/70 mt-1">${ev.summary || ''}</div>
+                        <div class="text-sm text-foreground/80 mt-2">🕒 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</div>
+                        ${ev.location ? `<div class="text-sm text-foreground/80">📍 ${ev.location}</div>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    html += '</div>';
+    view.innerHTML = html;
+}
+
+function renderCalendar() {
+    updateHeaderLabel();
+    if (currentView === 'month') return renderMonthView();
+    if (currentView === 'week') return renderWeekView();
+    if (currentView === 'day') return renderDayView();
+    return renderListView();
+}
+
+document.getElementById('btnToday').addEventListener('click', () => {
+    currentDate = new Date();
+    renderCalendar();
+});
+
+document.getElementById('btnPrev').addEventListener('click', () => {
+    if (currentView === 'month') currentDate.setMonth(currentDate.getMonth() - 1);
+    else if (currentView === 'week') currentDate.setDate(currentDate.getDate() - 7);
+    else if (currentView === 'day') currentDate.setDate(currentDate.getDate() - 1);
+    else currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+});
+
+document.getElementById('btnNext').addEventListener('click', () => {
+    if (currentView === 'month') currentDate.setMonth(currentDate.getMonth() + 1);
+    else if (currentView === 'week') currentDate.setDate(currentDate.getDate() + 7);
+    else if (currentView === 'day') currentDate.setDate(currentDate.getDate() + 1);
+    else currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+});
+
+document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-btn').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        renderCalendar();
+    });
+});
+
+renderCalendar();
+</script>
+
+<?php include __DIR__ . '/backend/helpers/floating_contact_widget.php'; ?>
 
 </body>
 </html>

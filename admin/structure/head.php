@@ -52,3 +52,4 @@
     <link rel="stylesheet" href="assets/css/dark-theme.css" />
     <!-- THAIFA CI color override -->
     <link rel="stylesheet" href="./assets/css/thaifa-ci.css" />
+    <link rel="stylesheet" href="./assets/css/thaifa-admin-ui.css" />

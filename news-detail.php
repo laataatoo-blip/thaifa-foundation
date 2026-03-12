@@ -5,6 +5,8 @@ error_reporting(E_ALL);
 date_default_timezone_set('Asia/Bangkok');
 
 include(__DIR__ . '/backend/classes/DatabaseManagement.class.php');
+include_once(__DIR__ . '/backend/helpers/i18n.php');
+thaifa_i18n_buffer_start();
 $DB = new DatabaseManagement();
 
 function h($str)
@@ -166,7 +168,7 @@ if (!empty($images)) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= htmlspecialchars(thaifa_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -192,17 +194,20 @@ if (!empty($images)) {
                 <img src="assets/images/Logo.png" alt="THAIFA" class="h-12 w-auto">
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm">
-                <a href="index.php" class="text-slate-600 hover:text-[#315d9f]">หน้าแรก</a>
-                <a href="about.php" class="text-slate-600 hover:text-[#315d9f]">เกี่ยวกับเรา</a>
-                <a href="calendar.php" class="text-slate-600 hover:text-[#315d9f]">ปฏิทิน</a>
-                <a href="contact.php" class="text-slate-600 hover:text-[#315d9f]">ติดต่อเรา</a>
+                <a href="index.php" class="text-slate-600 hover:text-[#315d9f]"><?= h(thaifa_t('home')) ?></a>
+                <a href="about.php" class="text-slate-600 hover:text-[#315d9f]"><?= h(thaifa_t('about')) ?></a>
+                <a href="calendar.php" class="text-slate-600 hover:text-[#315d9f]"><?= h(thaifa_t('calendar')) ?></a>
+                <a href="contact.php" class="text-slate-600 hover:text-[#315d9f]"><?= h(thaifa_t('contact')) ?></a>
+                <span class="text-slate-300">|</span>
+                <a href="<?= h(thaifa_lang_url('th')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='th' ? 'bg-[#233882] text-white' : 'text-slate-600 hover:text-[#315d9f]' ?>">TH</a>
+                <a href="<?= h(thaifa_lang_url('en')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='en' ? 'bg-[#233882] text-white' : 'text-slate-600 hover:text-[#315d9f]' ?>">EN</a>
             </nav>
         </div>
     </header>
 
     <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="text-sm text-slate-500 mb-5">
-            <a href="index.php" class="hover:text-[#315d9f]">หน้าแรก</a>
+            <a href="index.php" class="hover:text-[#315d9f]"><?= h(thaifa_t('home')) ?></a>
             <span class="mx-2">/</span>
             <a href="index.php#news" class="hover:text-[#315d9f]">ข่าวสารล่าสุด</a>
             <?php if ($news): ?>
@@ -327,5 +332,6 @@ if (!empty($images)) {
             if (e.key === 'ArrowRight') changeImage(1);
         });
     </script>
+<?php include __DIR__ . '/backend/helpers/floating_contact_widget.php'; ?>
 </body>
 </html>

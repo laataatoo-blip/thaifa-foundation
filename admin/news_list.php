@@ -157,14 +157,14 @@ sort($categoryOptions, SORT_NATURAL | SORT_FLAG_CASE);
             white-space: nowrap;
         }
         #newsTable .col-id { width: 48px; text-align: center; }
-        #newsTable .col-news { width: 45%; min-width: 420px; }
+        #newsTable .col-news { width: 42%; min-width: 300px; }
         #newsTable .col-category { width: 110px; text-align: center; }
         #newsTable .col-date { width: 120px; }
         #newsTable .col-status { width: 72px; text-align: center; }
         #newsTable .col-imgcount { width: 46px; text-align: center; }
         #newsTable .col-admin { width: 56px; text-align: center; }
         #newsTable .col-updated { width: 138px; }
-        #newsTable .col-action { width: 158px; }
+        #newsTable .col-action { width: 148px; }
 
         .news-thumb {
             width: 72px;
@@ -276,17 +276,17 @@ sort($categoryOptions, SORT_NATURAL | SORT_FLAG_CASE);
                     </div>
                 <?php endif; ?>
 
-                <div class="card">
+                <div class="card thaifa-card">
                     <div class="card-body">
                         <div class="card-title">
                             <h4 class="mb-0">รายการข่าวทั้งหมด</h4>
                         </div>
                         <hr/>
 
-                        <div class="d-flex justify-content-end mb-2">
-                            <div style="min-width:220px;">
+                        <div class="admin-filter-bar justify-content-end mb-2">
+                            <div>
                                 <label for="categoryFilter" class="form-label mb-1">หมวดหมู่</label>
-                                <select id="categoryFilter" class="form-select form-select-sm">
+                                <select id="categoryFilter" class="form-select form-select-sm" style="min-width: 200px;">
                                     <option value="">ทั้งหมด</option>
                                     <?php foreach ($categoryOptions as $cat): ?>
                                         <option value="<?= h($cat) ?>"><?= h($cat) ?></option>

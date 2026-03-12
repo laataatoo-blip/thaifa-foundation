@@ -1,5 +1,29 @@
+<?php
+include_once(__DIR__ . '/backend/helpers/i18n.php');
+thaifa_i18n_buffer_start();
+include_once(__DIR__ . '/backend/helpers/cart_count.php');
+$cartCount = thaifaCartCount();
+$isEn = thaifa_lang() === 'en';
+include_once(__DIR__ . '/backend/classes/DonationManagement.class.php');
+
+$donationManager = new DonationManagement();
+$campaigns = $donationManager->getCampaigns(true);
+$donationError = '';
+$donationSuccess = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (($_POST['action'] ?? '') === 'donate_submit')) {
+    try {
+        $donationId = $donationManager->createDonation($_POST);
+        $donationSuccess = 'ส่งข้อมูลการบริจาคเรียบร้อย เลขที่รายการ #' . $donationId . ' ทีมงานจะตรวจสอบและติดต่อกลับ';
+    } catch (Throwable $e) {
+        $donationError = $e->getMessage();
+    }
+}
+
+function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= htmlspecialchars(thaifa_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -82,20 +106,20 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
-                            <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                            <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?= (int)$cartCount ?></span>
                         </a>
 
                         <!-- Auth Buttons -->
-                        <div class="flex items-center gap-2 pl-4 border-l border-border">
+                        <div class="flex items-center gap-1"><a href="<?= h(thaifa_lang_url('th')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='th' ? 'bg-primary text-white' : 'text-foreground/70 hover:text-primary' ?>">TH</a><a href="<?= h(thaifa_lang_url('en')) ?>" class="text-xs px-2 py-0.5 rounded <?= thaifa_lang()==='en' ? 'bg-primary text-white' : 'text-foreground/70 hover:text-primary' ?>">EN</a></div><div class="flex items-center gap-2 pl-4 border-l border-border">
                             <a href="login.php" class="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                                <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                                <span class="hidden sm:inline"><?= h(thaifa_t('login')) ?></span>
                             </a>
                             <span class="text-foreground/40">/</span>
                             <a href="register.php" class="text-foreground/80 hover:text-primary transition-colors">
-                                <span class="hidden sm:inline">สมัครสมาชิก</span>
+                                <span class="hidden sm:inline"><?= h(thaifa_t('register')) ?></span>
                             </a>
                         </div>
                     </div>
@@ -112,14 +136,14 @@
                             alt="THAIFA Logo" class="h-20 w-auto" />
                     </a>
                     <div class="hidden lg:flex items-center gap-1">
-                        <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">หน้าแรก</a>
-                        <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เกี่ยวกับเรา</a>
-                        <a href="calendar.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ปฏิทิน</a>
-                        <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ร้านค้า</a>
-                        <a href="donate.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md">การบริจาค</a>
-                        <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">จิตอาสา</a>
-                        <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">เสียงจากใจ</a>
-                        <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100">ติดต่อเรา</a>
+                        <a href="index.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('home')) ?></a>
+                        <a href="about.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('about')) ?></a>
+                        <a href="calendar.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('calendar')) ?></a>
+                        <a href="shop.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('shop')) ?></a>
+                        <a href="donate.php" class="text-[#315d9f] bg-sky-100 px-4 py-2 rounded-md"><?= h(thaifa_t('donate')) ?></a>
+                        <a href="volunteer.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('volunteer')) ?></a>
+                        <a href="stories.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('stories')) ?></a>
+                        <a href="contact.php" class="text-foreground px-4 py-2 rounded-md hover:text-[#315d9f] hover:bg-sky-100"><?= h(thaifa_t('contact')) ?></a>
                     </div>
                 </div>
             </div>
@@ -178,6 +202,15 @@
 
                     <!-- Right Side - Donation Form -->
                     <div class="p-8 bg-white rounded-3xl shadow-2xl">
+                        <?php if ($donationError): ?>
+                            <div class="mb-4 p-3 rounded-xl bg-red-50 text-red-700 border border-red-200"><?= h($donationError) ?></div>
+                        <?php endif; ?>
+                        <?php if ($donationSuccess): ?>
+                            <div class="mb-4 p-3 rounded-xl bg-green-50 text-green-700 border border-green-200"><?= h($donationSuccess) ?></div>
+                        <?php endif; ?>
+
+                        <form method="post">
+                            <input type="hidden" name="action" value="donate_submit">
                         <div class="flex items-center gap-4 mb-8">
                             <div class="w-14 h-14 bg-accent rounded-full flex items-center justify-center">
                                 <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
@@ -191,11 +224,11 @@
                         <div class="mb-6">
                             <label class="block text-foreground mb-3">เลือกจำนวนเงิน (บาท)</label>
                             <div class="grid grid-cols-3 gap-3">
-                                <button onclick="selectAmount(500)" id="btn-500" class="amount-btn py-3 px-4 rounded-xl border-2 border-accent bg-accent/10 text-accent transition-all">฿500</button>
-                                <button onclick="selectAmount(1000)" id="btn-1000" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿1,000</button>
-                                <button onclick="selectAmount(2500)" id="btn-2500" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿2,500</button>
-                                <button onclick="selectAmount(5000)" id="btn-5000" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿5,000</button>
-                                <button onclick="selectAmount(10000)" id="btn-10000" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿10,000</button>
+                                <button type="button" onclick="selectAmount(500)" id="btn-500" class="amount-btn py-3 px-4 rounded-xl border-2 border-accent bg-accent/10 text-accent transition-all">฿500</button>
+                                <button type="button" onclick="selectAmount(1000)" id="btn-1000" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿1,000</button>
+                                <button type="button" onclick="selectAmount(2500)" id="btn-2500" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿2,500</button>
+                                <button type="button" onclick="selectAmount(5000)" id="btn-5000" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿5,000</button>
+                                <button type="button" onclick="selectAmount(10000)" id="btn-10000" class="amount-btn py-3 px-4 rounded-xl border-2 border-border text-foreground hover:border-accent/50 transition-all">฿10,000</button>
                             </div>
                         </div>
 
@@ -203,19 +236,37 @@
                             <label class="block text-foreground mb-3">หรือระบุจำนวนเงิน</label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">฿</span>
-                                <input id="custom-amount" type="number" placeholder="ระบุจำนวนเงิน" oninput="handleCustomAmount()" class="w-full pl-10 pr-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all" />
+                                <input id="custom-amount" name="amount" type="number" min="1" placeholder="ระบุจำนวนเงิน" oninput="handleCustomAmount()" class="w-full pl-10 pr-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all" required />
                             </div>
                         </div>
 
                         <div class="mb-8">
                             <label class="block text-foreground mb-3">ประเภทการบริจาค</label>
                             <div class="grid grid-cols-2 gap-3">
-                                <button onclick="selectType('once')" id="type-once" class="py-3 px-4 rounded-xl border-2 border-accent bg-accent/10 text-accent transition-all">ครั้งเดียว</button>
-                                <button onclick="selectType('monthly')" id="type-monthly" class="py-3 px-4 rounded-xl border-2 border-border hover:border-accent/50 transition-all">รายเดือน</button>
+                                <button type="button" onclick="selectType('once')" id="type-once" class="py-3 px-4 rounded-xl border-2 border-accent bg-accent/10 text-accent transition-all">ครั้งเดียว</button>
+                                <button type="button" onclick="selectType('monthly')" id="type-monthly" class="py-3 px-4 rounded-xl border-2 border-border hover:border-accent/50 transition-all">รายเดือน</button>
                             </div>
+                            <input type="hidden" id="donation_type" name="donation_type" value="once">
                         </div>
 
-                        <button onclick="handleDonate()" class="w-full bg-accent text-white hover:bg-accent/90 rounded-full h-12 flex items-center justify-center gap-2">
+                        <div class="grid md:grid-cols-2 gap-3 mb-4">
+                            <input name="donor_name" class="w-full px-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all" placeholder="ชื่อผู้บริจาค" required>
+                            <input name="donor_phone" class="w-full px-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all" placeholder="เบอร์โทรศัพท์">
+                            <input name="donor_email" type="email" class="w-full px-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all md:col-span-2" placeholder="อีเมล">
+                            <select name="campaign_id" class="w-full px-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all">
+                                <option value="">เลือกวัตถุประสงค์การบริจาค</option>
+                                <?php foreach ($campaigns as $cp): ?>
+                                    <option value="<?= (int)$cp['id'] ?>"><?= h($cp['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <select name="payment_method" class="w-full px-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all">
+                                <option value="transfer"><?= $isEn ? 'Bank Transfer' : 'โอนผ่านบัญชีธนาคาร' ?></option>
+                                <option value="qr"><?= $isEn ? 'Scan QR' : 'สแกน QR' ?></option>
+                                <option value="credit_card"><?= $isEn ? 'Credit / Debit Card' : 'บัตรเครดิต/เดบิต' ?></option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full bg-accent text-white hover:bg-accent/90 rounded-full h-12 flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                             ดำเนินการบริจาค
                         </button>
@@ -223,6 +274,7 @@
                         <p class="text-muted-foreground text-center mt-6 text-sm">
                             ข้อมูลการชำระเงินของคุณได้รับการปกป้องด้วยระบบความปลอดภัยขั้นสูง
                         </p>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -270,7 +322,7 @@
                         <div class="inline-block mb-4 px-6 py-2 bg-accent/10 rounded-full">
                             <span class="text-accent">ประเภทการบริจาค</span>
                         </div>
-                        <h2 class="text-4xl md:text-5xl text-primary mb-4">เราบริจาคอะไรบ้าง</h2>
+                        <h2 class="text-4xl md:text-5xl text-primary mb-4"><?= $isEn ? 'Where Your Donation Goes' : 'เราบริจาคอะไรบ้าง' ?></h2>
                         <p class="text-lg text-foreground/70 max-w-3xl mx-auto">
                             การบริจาคของคุณจะถูกนำไปใช้ในการช่วยเหลือสังคมในหลายรูปแบบ
                         </p>
@@ -399,7 +451,7 @@
                 <!-- About -->
                 <div>
                     <div class="mb-6">
-                        <img src="assets/images/Blue logo.png" alt="THAIFA Foundation" class="h-16 w-auto brightness-0 invert" />
+                        <img src="assets/images/Logo.png" alt="THAIFA Foundation" class="h-16 w-auto bg-white rounded-md p-1" />
                     </div>
                     <p class="text-white/80 text-sm leading-relaxed mb-4">
                         มูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน มุ่งมั่นสร้างโอกาสและพัฒนาคุณภาพชีวิตของเด็กและเยาวชนไทย
@@ -414,12 +466,12 @@
                 <div>
                     <h3 class="mb-6 text-xl">เมนูหลัก</h3>
                     <ul class="space-y-3">
-                        <li><a href="index.php" class="text-white/80 hover:text-accent transition-colors text-sm">หน้าแรก</a></li>
-                        <li><a href="about.php" class="text-white/80 hover:text-accent transition-colors text-sm">เกี่ยวกับเรา</a></li>
-                        <li><a href="donate.php" class="text-white/80 hover:text-accent transition-colors text-sm">การบริจาค</a></li>
-                        <li><a href="volunteer.php" class="text-white/80 hover:text-accent transition-colors text-sm">จิตอาสา</a></li>
-                        <li><a href="stories.php" class="text-white/80 hover:text-accent transition-colors text-sm">เสียงจากใจ</a></li>
-                        <li><a href="contact.php" class="text-white/80 hover:text-accent transition-colors text-sm">ติดต่อเรา</a></li>
+                        <li><a href="index.php" class="text-white/80 hover:text-accent transition-colors text-sm"><?= h(thaifa_t('home')) ?></a></li>
+                        <li><a href="about.php" class="text-white/80 hover:text-accent transition-colors text-sm"><?= h(thaifa_t('about')) ?></a></li>
+                        <li><a href="donate.php" class="text-white/80 hover:text-accent transition-colors text-sm"><?= h(thaifa_t('donate')) ?></a></li>
+                        <li><a href="volunteer.php" class="text-white/80 hover:text-accent transition-colors text-sm"><?= h(thaifa_t('volunteer')) ?></a></li>
+                        <li><a href="stories.php" class="text-white/80 hover:text-accent transition-colors text-sm"><?= h(thaifa_t('stories')) ?></a></li>
+                        <li><a href="contact.php" class="text-white/80 hover:text-accent transition-colors text-sm"><?= h(thaifa_t('contact')) ?></a></li>
                     </ul>
                 </div>
 
@@ -437,7 +489,7 @@
 
                 <!-- Contact Info -->
                 <div>
-                    <h3 class="mb-6 text-xl">ติดต่อเรา</h3>
+                    <h3 class="mb-6 text-xl"><?= h(thaifa_t('contact')) ?></h3>
                     <ul class="space-y-4">
                         <li class="flex items-start gap-3">
                             <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -480,11 +532,15 @@
     <script>
         let selectedAmount = 500;
         let donationType = 'once';
+        document.addEventListener('DOMContentLoaded', function () {
+            const amountInput = document.getElementById('custom-amount');
+            if (amountInput && !amountInput.value) amountInput.value = selectedAmount;
+        });
 
         function selectAmount(amount) {
             selectedAmount = amount;
             const customInput = document.getElementById('custom-amount');
-            customInput.value = '';
+            customInput.value = amount;
             customInput.className = 'w-full pl-10 pr-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all';
             
             document.querySelectorAll('.amount-btn').forEach(btn => {
@@ -495,6 +551,8 @@
 
         function selectType(type) {
             donationType = type;
+            const hiddenType = document.getElementById('donation_type');
+            if (hiddenType) hiddenType.value = type;
             if (type === 'once') {
                 document.getElementById('type-once').className = 'py-3 px-4 rounded-xl border-2 border-accent bg-accent/10 text-accent transition-all';
                 document.getElementById('type-monthly').className = 'py-3 px-4 rounded-xl border-2 border-border hover:border-accent/50 transition-all';
@@ -502,16 +560,6 @@
                 document.getElementById('type-monthly').className = 'py-3 px-4 rounded-xl border-2 border-accent bg-accent/10 text-accent transition-all';
                 document.getElementById('type-once').className = 'py-3 px-4 rounded-xl border-2 border-border hover:border-accent/50 transition-all';
             }
-        }
-
-        function handleDonate() {
-            const custom = document.getElementById('custom-amount').value;
-            const amount = custom ? Number(custom) : selectedAmount;
-            if (amount <= 0) {
-                alert('กรุณาระบุจำนวนเงินที่ต้องการบริจาค');
-                return;
-            }
-            alert(`ขอบคุณที่ต้องการบริจาค ${amount.toLocaleString()} บาท แบบ${donationType === 'once' ? 'ครั้งเดียว' : 'รายเดือน'}`);
         }
 
         function handleCustomAmount() {
@@ -529,122 +577,8 @@
                 // Reset custom input border
                 customInput.className = 'w-full pl-10 pr-4 py-3 border-2 border-border rounded-xl focus:border-accent focus:outline-none bg-input-background transition-all';
             }
-        }
+        }    </script>    </div>
 
-        function toggleFloatingContact() {
-            document.getElementById('contactModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeContactModal() {
-            document.getElementById('contactModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeContactModal();
-        });
-    </script>
-
-    <!-- Floating Contact Button -->
-    <div class="fixed bottom-6 right-6 z-50">
-        <button onclick="toggleFloatingContact()" class="bg-primary hover:bg-primary/90 text-white rounded-full px-5 py-4 shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-            <span class="text-sm">ติดต่อเรา</span>
-        </button>
-    </div>
-
-    <!-- Contact Modal -->
-    <div id="contactModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onclick="if(event.target.id === 'contactModal') closeContactModal()">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl text-primary">ติดต่อเรา</h3>
-                <button onclick="closeContactModal()" class="text-foreground/40 hover:text-foreground/80 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <p class="text-foreground/70 mb-6">เลือกช่องทางที่คุณต้องการติดต่อ</p>
-            <div class="space-y-3">
-                <a href="mailto:thaifafoundation@gmail.com" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">อีเมล</div>
-                        <div class="text-sm text-foreground/60">thaifafoundation@gmail.com</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.facebook.com/share/1FdXqqJNXE/" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #1877F2;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">Facebook</div>
-                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://line.me/R/ti/p/@519lkcsb" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #06C755;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">LINE</div>
-                        <div class="text-sm text-foreground/60">@thaifa</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.youtube.com/@THAIFAFoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #FF0000;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">YouTube</div>
-                        <div class="text-sm text-foreground/60">THAIFA Foundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                <a href="https://www.tiktok.com/@thaifafoundation" target="_blank" class="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all group">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style="background: #000000;">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.10-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-primary">TikTok</div>
-                        <div class="text-sm text-foreground/60">@thaifafoundation</div>
-                    </div>
-                    <svg class="w-5 h-5 text-foreground/40 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-            </div>
-            <div class="mt-6 pt-6 border-t border-border">
-                <p class="text-xs text-center text-foreground/50">เวลาทำการ: จันทร์-ศุกร์ 9:00-17:00 น.</p>
-            </div>
-        </div>
-    </div>
-
+<?php include __DIR__ . '/backend/helpers/floating_contact_widget.php'; ?>
 </body>
 </html>

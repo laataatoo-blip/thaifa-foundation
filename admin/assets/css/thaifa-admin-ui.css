@@ -1,0 +1,390 @@
+:root {
+    --thaifa-bg: #f3f7fc;
+    --thaifa-surface: #ffffff;
+    --thaifa-border: #d9e7ef;
+    --thaifa-primary: #3357a3;
+    --thaifa-primary-deep: #303a56;
+    --thaifa-accent: #d51d3c;
+    --thaifa-text: #303a56;
+    --thaifa-muted: #6b7a99;
+}
+
+body {
+    background: var(--thaifa-bg);
+    color: var(--thaifa-text);
+}
+
+.sidebar-header,
+.top-header {
+    border-color: var(--thaifa-border) !important;
+}
+
+.sidebar-header {
+    background: linear-gradient(135deg, #303a56 0%, #3357a3 70%, #2b75a3 100%) !important;
+}
+
+.sidebar-header .logo-text,
+.sidebar-header .toggle-btn,
+.sidebar-header .bx {
+    color: #fff !important;
+}
+
+.sidebar-wrapper {
+    background: #fff !important;
+    border-right: 1px solid var(--thaifa-border);
+}
+
+.sidebar-wrapper .menu-label {
+    color: #8ca0bd !important;
+    letter-spacing: .08em;
+    font-size: 11px;
+}
+
+.sidebar-wrapper .metismenu a {
+    border-radius: 10px;
+    margin: 2px 8px;
+    color: #475569;
+}
+
+.sidebar-wrapper .metismenu .parent-icon {
+    color: var(--thaifa-primary) !important;
+}
+
+.sidebar-wrapper .metismenu a:hover,
+.sidebar-wrapper .metismenu a:focus,
+.sidebar-wrapper .metismenu .mm-active > a {
+    color: var(--thaifa-primary-deep) !important;
+    background: #edf3ff !important;
+}
+
+.sidebar-wrapper .metismenu .mm-active > a .menu-title {
+    font-weight: 700;
+}
+
+.top-header {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(7px);
+}
+
+.top-header .navbar-nav .nav-link {
+    border-left: 1px solid var(--thaifa-border) !important;
+}
+
+.top-header .user-name {
+    color: var(--thaifa-primary-deep);
+    font-weight: 700;
+}
+
+.dropdown-menu {
+    border: 1px solid var(--thaifa-border);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(48, 58, 86, 0.12);
+}
+
+.wrapper,
+.page-wrapper,
+.page-content-wrapper,
+.page-content {
+    max-width: 100%;
+}
+
+.page-content {
+    overflow-x: clip;
+}
+
+.page-content {
+    padding-top: 18px;
+}
+
+.page-breadcrumb .breadcrumb-title {
+    color: var(--thaifa-primary-deep);
+    font-weight: 700;
+    border-color: var(--thaifa-border) !important;
+}
+
+.breadcrumb-item,
+.breadcrumb-item.active {
+    color: #5f7393 !important;
+}
+
+.thaifa-hero {
+    background: linear-gradient(135deg, #2b75a3 0%, #3357a3 45%, #303a56 100%);
+    color: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.15);
+    box-shadow: 0 12px 28px rgba(48, 58, 86, 0.18);
+}
+
+.thaifa-hero .sub {
+    color: rgba(255,255,255,.9);
+}
+
+.thaifa-card {
+    border: 1px solid var(--thaifa-border);
+    border-radius: 14px;
+    background: var(--thaifa-surface);
+    box-shadow: 0 4px 16px rgba(48, 58, 86, 0.06);
+}
+
+.thaifa-card .card-header {
+    background: #fff;
+    border-bottom: 1px solid var(--thaifa-border);
+    border-radius: 14px 14px 0 0;
+}
+
+.thaifa-stat {
+    border: 1px solid var(--thaifa-border);
+    border-radius: 14px;
+    background: #fff;
+    padding: 16px;
+    min-height: 118px;
+    box-shadow: 0 4px 14px rgba(48, 58, 86, 0.05);
+}
+
+.thaifa-stat .label {
+    color: var(--thaifa-muted);
+    font-size: 14px;
+}
+
+.thaifa-stat .value {
+    font-size: 34px;
+    line-height: 1;
+    color: var(--thaifa-primary-deep);
+    font-weight: 700;
+}
+
+.quick-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.quick-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--thaifa-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--thaifa-primary-deep);
+    padding: 10px 12px;
+    text-decoration: none;
+    transition: all .15s ease;
+}
+
+.quick-menu-item:hover {
+    border-color: var(--thaifa-primary);
+    box-shadow: 0 8px 16px rgba(51,87,163,.14);
+    transform: translateY(-1px);
+    color: var(--thaifa-primary);
+}
+
+.quick-menu-item i {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(51,87,163,.12);
+}
+
+.brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.35);
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.brand-4p {
+    border-left: 4px solid var(--thaifa-primary);
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid var(--thaifa-border);
+    padding: 12px;
+}
+
+.brand-4p h6 {
+    margin: 0 0 6px;
+    color: var(--thaifa-primary-deep);
+}
+
+.brand-4p p {
+    margin: 0;
+    color: var(--thaifa-muted);
+}
+
+.table thead th {
+    white-space: nowrap;
+}
+
+.card {
+    border: 1px solid var(--thaifa-border);
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(48, 58, 86, 0.06);
+}
+
+.card-header {
+    background: #f8fbff;
+    border-bottom: 1px solid var(--thaifa-border);
+    border-top-left-radius: 14px !important;
+    border-top-right-radius: 14px !important;
+}
+
+.alert {
+    border-radius: 12px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    color: #0f5132;
+    border-color: #badbcc;
+    background: #e9f7ef;
+}
+
+.alert-danger {
+    color: #842029;
+    border-color: #f2c4cd;
+    background: #fff1f3;
+}
+
+.alert-warning {
+    color: #664d03;
+    border-color: #ffecb5;
+    background: #fff8df;
+}
+
+.thaifa-section-title {
+    color: var(--thaifa-primary-deep);
+    font-weight: 700;
+}
+
+.badge-soft {
+    background: rgba(51,87,163,.12);
+    color: var(--thaifa-primary-deep);
+    border: 1px solid rgba(51,87,163,.2);
+}
+
+.form-control,
+.form-select {
+    border-color: var(--thaifa-border);
+    border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #3357a3;
+    box-shadow: 0 0 0 .2rem rgba(51,87,163,.14);
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-sm {
+    border-radius: 9px;
+}
+
+.thaifa-card .card-body {
+    padding: 1rem 1.1rem;
+}
+
+.thaifa-card .table-responsive {
+    border: 1px solid #e8edf5;
+    border-radius: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.thaifa-card .table {
+    margin-bottom: 0;
+}
+
+.thaifa-card .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f8fbff;
+    font-weight: 700;
+    color: #2f3a56;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.table > :not(caption) > * > * {
+    border-color: #e7edf6;
+}
+
+.badge.bg-success,
+.badge.bg-danger,
+.badge.bg-warning,
+.badge.bg-info,
+.badge.bg-primary {
+    border-radius: 999px;
+}
+
+.admin-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: end;
+}
+
+.admin-inline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    align-items: center;
+}
+
+.admin-inline-actions .btn {
+    white-space: nowrap;
+}
+
+.admin-thumb-sm {
+    width: 46px;
+    height: 46px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.admin-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border-radius: 999px;
+    border: 1px solid #d9e7ef;
+    background: #f8fbff;
+    color: #334155;
+    padding: .15rem .5rem;
+    font-size: 12px;
+}
+
+@media (max-width: 1200px) {
+    .quick-menu-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .thaifa-stat .value {
+        font-size: 28px;
+    }
+    .thaifa-card .card-body {
+        padding: .9rem;
+    }
+    .page-content {
+        padding-top: 12px;
+    }
+}

@@ -6,7 +6,12 @@ session_start();
 
 // --- 1. Auto Login Logic ---
 // ตรวจสอบว่ามี Session เดิมอยู่แล้วหรือไม่ ถ้ามีให้ Redirect ไปเลย ไม่ต้อง Query ใหม่
-if (isset($_SESSION['AdminLogin']['Username']) && isset($_SESSION['AdminLoginType']['SchoolHub'])) {
+// รองรับทั้ง key เดิม (SchoolHub) และ key ปัจจุบัน (Thaifa)
+$hasAdminType =
+    isset($_SESSION['AdminLoginType']['Thaifa']) ||
+    isset($_SESSION['AdminLoginType']['SchoolHub']);
+
+if (isset($_SESSION['AdminLogin']['Username']) && $hasAdminType) {
     header("Location: index.php");
     exit;
 }
@@ -15,9 +20,15 @@ if (isset($_SESSION['AdminLogin']['Username']) && isset($_SESSION['AdminLoginTyp
 $state = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
     
-    include('../backend/classes/DatabaseManagement.class.php');
+    if (!class_exists('DatabaseManagement')) {
+        include_once(__DIR__ . '/../backend/classes/DatabaseManagement.class.php');
+    }
+    if (!class_exists('AdminSecurityManagement')) {
+        include_once(__DIR__ . '/../backend/classes/AdminSecurityManagement.class.php');
+    }
     // include('./backend/classes/Database.class.php'); // ปกติ DatabaseManagement มักจะ include Database มาแล้ว หรือ inherit มา
     $DB = new DatabaseManagement();
+    $securityAudit = new AdminSecurityManagement();
 
     $username = trim($_POST['username']);
     $password = md5(trim($_POST['password'])); // *แนะนำเปลี่ยนเป็น password_verify ในอนาคต
@@ -39,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
         // Login Success
         $_SESSION['AdminLogin'] = $AdminLogin;
         $_SESSION['AdminLoginType'] = ['Thaifa' => 'Admin']; // กำหนดประเภทการล็อกอิน
+        $securityAudit->recordLoginSuccess($AdminLogin);
 
         // Redirect
         $Redirect = "index.php";
@@ -49,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
         exit;
     } else {
         // Login Failed
+        $securityAudit->recordLoginFailed($username);
         $state = 'error';
     }
 }
@@ -59,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Hub | Login</title>
+    <title>THAIFA Admin | Login</title>
     <link rel="icon" href="./assets/images/SchoolHubLogo.png" type="image/png" />
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -69,16 +82,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
     <style>
         body {
             font-family: 'Sarabun', sans-serif;
-            background-color: #f0f2f5; /* สีพื้นหลังสบายตา */
+            background:
+                radial-gradient(circle at 12% 20%, rgba(43,117,163,.18), transparent 34%),
+                radial-gradient(circle at 85% 15%, rgba(51,87,163,.2), transparent 32%),
+                #f3f7fc;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .login-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid #d9e7ef;
+            border-radius: 16px;
+            box-shadow: 0 18px 36px rgba(48, 58, 86, 0.12);
             background: #fff;
             overflow: hidden;
         }
@@ -88,35 +104,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
             margin-bottom: 1rem;
         }
         .btn-primary {
-            background-color: #0d6efd;
-            border: none;
+            background-color: #3357a3;
+            border-color: #3357a3;
             padding: 10px;
-            font-weight: 500;
+            font-weight: 600;
             border-radius: 8px;
             transition: all 0.3s ease;
         }
         .btn-primary:hover {
-            background-color: #0b5ed7;
+            background-color: #2b75a3;
+            border-color: #2b75a3;
             transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+            box-shadow: 0 6px 14px rgba(51, 87, 163, 0.28);
         }
         .form-control {
             border-radius: 8px;
             padding: 12px 15px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #d9e7ef;
         }
         .form-control:focus {
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+            border-color: #3357a3;
+            box-shadow: 0 0 0 3px rgba(51, 87, 163, 0.16);
         }
         .input-group-text {
             border-radius: 0 8px 8px 0;
             cursor: pointer;
             background-color: #fff;
+            border-color: #d9e7ef;
         }
         /* Floating Label Adjustments */
         .form-floating > .form-control:focus ~ label,
         .form-floating > .form-control:not(:placeholder-shown) ~ label {
-            color: #0d6efd;
+            color: #3357a3;
             transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
         }
     </style>
@@ -139,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['BtnSubmit'])) {
                                 </div>
                             <?php endif; ?>
                             
-                            <h4 class="fw-bold text-dark">Thaifa FD Admin</h4>
+                            <h4 class="fw-bold text-dark">THAIFA Foundation Admin</h4>
                             <p class="text-muted small">สำหรับแอดมินมูลนิธิตัวแทนประกันชีวิตและที่ปรึกษาการเงิน</p>
                         </div>
 

@@ -4,6 +4,7 @@
 if (!class_exists('Database')) {
     include_once(__DIR__ . '/Database.class.php');
 }
+if (!class_exists('DatabaseManagement')) {
 class DatabaseManagement extends Database
 {
 
@@ -370,4 +371,5 @@ class DatabaseManagement extends Database
             exit;
         }
     }
+}
 }
