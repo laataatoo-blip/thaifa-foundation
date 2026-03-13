@@ -257,18 +257,19 @@ class AnalyticsManagement
     public function overview($days = 7)
     {
         $days = max(1, (int)$days);
+        $dateWhere = "view_date >= DATE_SUB(CURDATE(), INTERVAL " . max(0, $days - 1) . " DAY)";
         $summary = $this->db->selectOne(
             "SELECT COUNT(*) AS views,
                     COUNT(DISTINCT ip_hash) AS visitors,
                     COUNT(DISTINCT session_key) AS sessions
              FROM analytics_pageviews
-             WHERE created_at >= DATE_SUB(NOW(), INTERVAL {$days} DAY)"
+             WHERE {$dateWhere}"
         );
 
         $daily = $this->db->selectAll(
             "SELECT view_date, COUNT(*) AS views, COUNT(DISTINCT ip_hash) AS visitors
              FROM analytics_pageviews
-             WHERE created_at >= DATE_SUB(NOW(), INTERVAL {$days} DAY)
+             WHERE {$dateWhere}
              GROUP BY view_date
              ORDER BY view_date ASC"
         );
@@ -276,20 +277,20 @@ class AnalyticsManagement
         $topPagesRaw = $this->db->selectAll(
             "SELECT page_path, COUNT(*) AS views, COUNT(DISTINCT ip_hash) AS visitors
              FROM analytics_pageviews
-             WHERE created_at >= DATE_SUB(NOW(), INTERVAL {$days} DAY)
+             WHERE {$dateWhere}
              GROUP BY page_path
              ORDER BY views DESC
-             LIMIT 300"
+             LIMIT 120"
         );
 
         $topRefRaw = $this->db->selectAll(
             "SELECT referrer, COUNT(*) AS views
              FROM analytics_pageviews
-             WHERE created_at >= DATE_SUB(NOW(), INTERVAL {$days} DAY)
+             WHERE {$dateWhere}
                AND referrer <> ''
              GROUP BY referrer
              ORDER BY views DESC
-             LIMIT 300"
+             LIMIT 120"
         );
 
         $topPages = $this->aggregateTopPages($topPagesRaw);

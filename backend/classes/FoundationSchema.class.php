@@ -6,6 +6,26 @@ if (!class_exists('DatabaseManagement')) {
 
 class FoundationSchema
 {
+    private static function addIndexIfMissing(DatabaseManagement $db, $tableName, $indexName, $indexExpr)
+    {
+        $exists = $db->selectOne(
+            "SELECT 1
+             FROM information_schema.statistics
+             WHERE table_schema = DATABASE()
+               AND table_name = :table_name
+               AND index_name = :index_name
+             LIMIT 1",
+            [
+                ':table_name' => $tableName,
+                ':index_name' => $indexName,
+            ]
+        );
+
+        if (!$exists) {
+            $db->query("ALTER TABLE `{$tableName}` ADD INDEX `{$indexName}` {$indexExpr}");
+        }
+    }
+
     public static function ensure(DatabaseManagement $db)
     {
         $db->query("CREATE TABLE IF NOT EXISTS donation_campaigns (
@@ -83,6 +103,10 @@ class FoundationSchema
             INDEX idx_analytics_page (page_path),
             INDEX idx_analytics_ip (ip_hash)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        self::addIndexIfMissing($db, 'analytics_pageviews', 'idx_analytics_created', '(created_at)');
+        self::addIndexIfMissing($db, 'analytics_pageviews', 'idx_analytics_date_ip', '(view_date, ip_hash)');
+        self::addIndexIfMissing($db, 'analytics_pageviews', 'idx_analytics_date_page', '(view_date, page_path)');
+        self::addIndexIfMissing($db, 'analytics_pageviews', 'idx_analytics_date_ref', '(view_date, referrer)');
 
         $campaignCount = $db->selectOne("SELECT COUNT(*) AS c FROM donation_campaigns");
         if ((int)($campaignCount['c'] ?? 0) === 0) {

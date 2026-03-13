@@ -33,24 +33,7 @@ function imageUrlForFrontend($path)
     return $clean;
 }
 
-$aboutHeroImage = 'assets/images/about aplic.jpg';
-try {
-    $row = $DB->selectOne("
-        SELECT ni.image_url
-        FROM news n
-        INNER JOIN news_images ni ON ni.news_id = n.id
-        WHERE n.is_visible = 1
-          AND ni.image_url IS NOT NULL
-          AND ni.image_url <> ''
-        ORDER BY COALESCE(n.source_published_at, CONCAT(n.posted_date, ' 00:00:00')) DESC, ni.sort_order ASC, ni.id ASC
-        LIMIT 1
-    ");
-    if (!empty($row['image_url'])) {
-        $aboutHeroImage = imageUrlForFrontend($row['image_url']);
-    }
-} catch (Throwable $e) {
-    $aboutHeroImage = 'assets/images/about aplic.jpg';
-}
+$aboutHeroImage = 'assets/images/impactpic.png';
 
 $teamGroups = ['advisors' => [], 'executives' => [], 'committee' => []];
 try {
@@ -267,7 +250,7 @@ try {
                             <img
                                 src="<?= h($aboutHeroImage) ?>"
                                 alt="THAIFA Foundation - มอบทุนการศึกษา"
-                                onerror="this.onerror=null;this.src='assets/images/about aplic.jpg';"
+                                onerror="this.onerror=null;this.src='assets/images/impactpic.png';"
                                 class="w-full h-[500px] object-cover"
                             />
                             <!-- Figma: figma:asset/4e491dc46acd78e1aa2e8dda1d3918386daea8f0.png -->
